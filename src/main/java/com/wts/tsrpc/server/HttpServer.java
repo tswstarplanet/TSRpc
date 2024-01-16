@@ -2,13 +2,18 @@ package com.wts.tsrpc.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpServer {
+
+    private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
 
     private Integer port = 6688;
 
@@ -16,12 +21,34 @@ public class HttpServer {
 
     private Integer workerNum = 10;
 
+    private ChannelHandler serverInitializer;
+
     public HttpServer() {}
 
     public HttpServer(Integer port, Integer bossNum, Integer workerNum) {
         this.port = port;
         this.bossNum = bossNum;
         this.workerNum = workerNum;
+    }
+
+    public HttpServer port(Integer port) {
+        this.port = port;
+        return this;
+    }
+
+    public HttpServer bossNum(Integer bossNum) {
+        this.bossNum = bossNum;
+        return this;
+    }
+
+    public HttpServer workerNum(Integer workerNum) {
+        this.workerNum = workerNum;
+        return this;
+    }
+
+    public HttpServer serverInitializer(ChannelHandler serverInitializer) {
+        this.serverInitializer = serverInitializer;
+        return this;
     }
 
     public void start() {
@@ -34,11 +61,10 @@ public class HttpServer {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new HttpServerInitializer());
             ChannelFuture future = bootstrap.bind(port).sync();
-            System.out.println("Server start up on port: " + port);
+            logger.info("Server start up on port: " + port);
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
-            System.out.println("Server run error");
-            e.printStackTrace();
+            logger.error("Server run error: ", e);
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
@@ -68,4 +94,13 @@ public class HttpServer {
     public void setWorkerNum(Integer workerNum) {
         this.workerNum = workerNum;
     }
+
+    public ChannelHandler getServerInitializer() {
+        return serverInitializer;
+    }
+
+    public void setServerInitializer(ChannelHandler serverInitializer) {
+        this.serverInitializer = serverInitializer;
+    }
+
 }

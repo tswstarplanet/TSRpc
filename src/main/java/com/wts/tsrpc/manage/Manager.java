@@ -3,6 +3,8 @@ package com.wts.tsrpc.manage;
 import com.wts.tsrpc.exception.BizException;
 import com.wts.tsrpc.exception.ServiceDuplicateException;
 import com.wts.tsrpc.service.Service;
+import com.wts.tsrpc.service.ServiceRequest;
+import com.wts.tsrpc.service.Transformer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
@@ -13,11 +15,34 @@ public class Manager {
     private Application application;
     private Map<String, Service> serviceMap = new ConcurrentHashMap<>();
 
-    private Map<String, Object> serviceObjectMap = new ConcurrentHashMap<>();
+    private final Map<String, Object> serviceObjectMap = new ConcurrentHashMap<>();
+
+    private final Map<String, Transformer> transformerMap = new ConcurrentHashMap<>();
+
+    private final Map<String, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
     private static final Object serviceLock = new Object();
 
     private static final Object objectLock = new Object();
+
+    private static final Object transformLock = new Object();
+
+    private static final Object dispatcherLock = new Object();
+
+    private static final Manager manager = new Manager();
+
+    public static Manager getManager() {
+        return manager;
+    }
+
+    private Manager() {
+
+    }
+
+    public Manager application(Application application) {
+        this.application = application;
+        return this;
+    }
 
     public Manager addService(String serviceId, Service service) throws ServiceDuplicateException {
         if (StringUtils.isEmpty(serviceId)) {
@@ -51,6 +76,38 @@ public class Manager {
         return this;
     }
 
+    public Manager addTransformer(String transformType, Transformer transformer) {
+        if (StringUtils.isEmpty(transformType)) {
+            throw new BizException("ServiceId can not be empty !");
+        }
+        if (transformer == null) {
+            throw new BizException("Service can not be null !");
+        }
+        synchronized (transformLock) {
+            if (transformerMap.containsKey(transformType)) {
+                throw new BizException("The object has been exist in the object map !");
+            }
+            transformerMap.put(transformType, transformer);
+        }
+        return this;
+    }
+
+    public Manager addDispatcher(String dispatcherType, Dispatcher dispatcher) {
+        if (StringUtils.isEmpty(dispatcherType)) {
+            throw new BizException("ServiceId can not be empty !");
+        }
+        if (dispatcher == null) {
+            throw new BizException("Service can not be null !");
+        }
+        synchronized (dispatcherLock) {
+            if (dispatcherMap.containsKey(dispatcherType)) {
+                throw new BizException("The object has been exist in the object map !");
+            }
+            dispatcherMap.put(dispatcherType, dispatcher);
+        }
+        return this;
+    }
+
     public Service getService(String serviceId) {
         if (StringUtils.isEmpty(serviceId)) {
             throw new BizException("Service id is null !");
@@ -60,9 +117,23 @@ public class Manager {
 
     public Object getObject(String serviceId) {
         if (StringUtils.isEmpty(serviceId)) {
-            throw new BizException("Service id is null !");
+            throw new BizException("Service id is empty !");
         }
         return serviceObjectMap.get(serviceId);
+    }
+
+    public Transformer getTransform(String transformType) {
+        if (StringUtils.isEmpty(transformType)) {
+            throw new BizException("Transform type is empty !");
+        }
+        return transformerMap.get(transformType);
+    }
+
+    public Dispatcher getDispatcher(String dispatcherType) {
+        if (StringUtils.isEmpty(dispatcherType)) {
+            throw new BizException("Dispatcher type is empty !");
+        }
+        return dispatcherMap.get(dispatcherType);
     }
 
     public Map<String, Service> getServiceMap() {

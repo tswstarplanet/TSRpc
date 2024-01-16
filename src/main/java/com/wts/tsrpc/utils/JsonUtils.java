@@ -9,5 +9,7 @@ public class JsonUtils {
         return gson.toJson(o);
     }
 
-
+    public static  <T> T parseObject(String json, Class<T> clazz) {
+        return gson.fromJson(json, clazz);
+    }
 }

@@ -20,6 +20,10 @@ import java.lang.reflect.Method;
 public class ReflectDispatcher implements Dispatcher {
     private Manager manager;
 
+    public ReflectDispatcher() {
+
+    }
+
     public ServiceResponse dispatch(ServiceRequest request) {
         Service service = manager.getService(request.getServiceId());
         if (service == null) {
@@ -29,7 +33,6 @@ public class ReflectDispatcher implements Dispatcher {
             Class<?> clazz = Class.forName(service.getClassFullName());
             Method method = clazz.getMethod(service.getMethodName(), service.getArgTypes());
             Object returnValue = method.invoke(manager.getObject(request.getServiceId()), request.getParamValues());
-            ByteBuf content = Unpooled.copiedBuffer(JsonUtils.toJsonString(returnValue), CharsetUtil.UTF_8);
             return new ServiceResponse(ServiceResponseCode.SUCCESS.getCode(), ServiceResponseCode.SUCCESS.getMsg(), returnValue);
 //            return ResponseUtils.buildCommonHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, HttpContentType.APPLICATION_JSON.getContentType(), content);
         } catch (ClassNotFoundException e) {
