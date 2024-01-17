@@ -1,7 +1,5 @@
 package com.wts.tsrpc.service;
 
-import java.util.List;
-
 public class Service {
     private String classFullName;
 
@@ -10,6 +8,26 @@ public class Service {
     private Class<?>[] argTypes;
 
     private Class<?> returnType;
+
+    public Service classFullName(String classFullName) {
+        this.classFullName = classFullName;
+        return this;
+    }
+
+    public Service methodName(String methodName) {
+        this.methodName = methodName;
+        return this;
+    }
+
+    public Service argTypes(Class<?>[] argTypes) {
+        this.argTypes = argTypes;
+        return this;
+    }
+
+    public Service returnType(Class<?> returnType) {
+        this.returnType = returnType;
+        return this;
+    }
 
     public String getClassFullName() {
         return classFullName;

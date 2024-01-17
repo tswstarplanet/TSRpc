@@ -59,7 +59,7 @@ public class HttpServer {
             bootstrap.group(bossGroup, workerGroup)
                     .handler(new LoggingHandler(LogLevel.DEBUG))
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new HttpServerInitializer());
+                    .childHandler(serverInitializer);
             ChannelFuture future = bootstrap.bind(port).sync();
             logger.info("Server start up on port: " + port);
             future.channel().closeFuture().sync();

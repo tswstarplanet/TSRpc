@@ -5,14 +5,6 @@ import com.wts.tsrpc.service.Service;
 import com.wts.tsrpc.service.ServiceRequest;
 import com.wts.tsrpc.service.ServiceResponse;
 import com.wts.tsrpc.service.ServiceResponseCode;
-import com.wts.tsrpc.utils.HttpContentType;
-import com.wts.tsrpc.utils.JsonUtils;
-import com.wts.tsrpc.utils.ResponseUtils;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
-import io.netty.util.CharsetUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,6 +15,12 @@ public class ReflectDispatcher implements Dispatcher {
     public ReflectDispatcher() {
 
     }
+
+    public Dispatcher manager(Manager manager) {
+        this.manager = manager;
+        return this;
+    }
+
 
     public ServiceResponse dispatch(ServiceRequest request) {
         Service service = manager.getService(request.getServiceId());
@@ -44,5 +42,13 @@ public class ReflectDispatcher implements Dispatcher {
         } catch (IllegalAccessException e) {
             throw new BizException("Illegal Access Exception: " + e.getMessage());
         }
+    }
+
+    public Manager getManager() {
+        return manager;
+    }
+
+    public void setManager(Manager manager) {
+        this.manager = manager;
     }
 }

@@ -1,9 +1,7 @@
 package com.wts.tsrpc.manage;
 
 import com.wts.tsrpc.exception.BizException;
-import com.wts.tsrpc.exception.ServiceDuplicateException;
 import com.wts.tsrpc.service.Service;
-import com.wts.tsrpc.service.ServiceRequest;
 import com.wts.tsrpc.service.Transformer;
 import org.apache.commons.lang3.StringUtils;
 
@@ -35,7 +33,7 @@ public class Manager {
         return manager;
     }
 
-    private Manager() {
+    public Manager() {
 
     }
 
@@ -44,7 +42,7 @@ public class Manager {
         return this;
     }
 
-    public Manager addService(String serviceId, Service service) throws ServiceDuplicateException {
+    public Manager addService(String serviceId, Service service) {
         if (StringUtils.isEmpty(serviceId)) {
             throw new BizException("ServiceId can not be empty !");
         }
@@ -53,7 +51,7 @@ public class Manager {
         }
         synchronized (serviceLock) {
             if (serviceMap.containsKey(serviceId)) {
-                throw new ServiceDuplicateException();
+                throw new BizException("The service has been exist in the service map !");
             }
             serviceMap.put(serviceId, service);
         }
@@ -68,7 +66,7 @@ public class Manager {
             throw new BizException("Service can not be null !");
         }
         synchronized (objectLock) {
-            if (serviceMap.containsKey(serviceId)) {
+            if (serviceObjectMap.containsKey(serviceId)) {
                 throw new BizException("The object has been exist in the object map !");
             }
             serviceObjectMap.put(serviceId, object);

@@ -1,7 +1,5 @@
 package com.wts.tsrpc.manage;
 
-import org.checkerframework.checker.units.qual.A;
-
 public class Application {
     private String name;
 
@@ -9,7 +7,7 @@ public class Application {
 
     private static final Application application = new Application();
 
-    private Application() {
+    public Application() {
 
     }
 

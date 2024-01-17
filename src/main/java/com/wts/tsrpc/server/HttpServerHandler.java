@@ -53,48 +53,45 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        logger.info("method: {}", request.method().name());
-        logger.info("uri: {}", request.uri());
-        logger.info("http version: " + request.protocolVersion().text());
-        logger.info("head: " + request.headers().toString());
-        logger.info("request body: " + getBody(request));
+        try {
+            logger.info("method: {}", request.method().name());
+            logger.info("uri: {}", request.uri());
+            logger.info("http version: " + request.protocolVersion().text());
+            logger.info("head: " + request.headers().toString());
+            logger.info("request body: " + getBody(request));
 
+            String body = getBody(request);
 
-//        System.out.println("method: " + request.method().name());
-//        System.out.println("uri: " + request.uri());
-//        System.out.println("http version: " + request.protocolVersion().text());
-//
-//        System.out.println("head: " + request.headers().entries());
-//
-//        System.out.println("request body: " + getBody(request));
+            ServiceRequest serviceRequest = manager.getTransform(request.headers().get("transformType")).transform(body);
 
-        String body = getBody(request);
+            ServiceResponse serviceResponse = manager.getDispatcher(request.headers().get("dispatcherType")).dispatch(serviceRequest);
 
-        ServiceRequest serviceRequest = manager.getTransform(request.headers().get("transformType")).transform(body);
+            logger.info("channel = " + ctx.channel() + ", pipeline = " + ctx.pipeline() + ", channel of pipeline: " + ctx.pipeline().channel());
+            logger.info("current handler = " + ctx.handler());
 
-        ServiceResponse serviceResponse = manager.getDispatcher(request.headers().get("dispatcherType")).dispatch(serviceRequest);
+            logger.info("ctx type = " + ctx.getClass());
+            logger.info("pipeline hashcode = " + ctx.pipeline().hashCode() + ", HttpServerHandler hash = " + this.hashCode());
+            logger.info("msg type = " + request.getClass());
+            logger.info("client addr = " + ctx.channel().remoteAddress());
 
-//        System.out.println("channel = " + ctx.channel() + ", pipeline = " + ctx.pipeline() + ", channel of pipeline: " + ctx.pipeline().channel());
-//        System.out.println("current handler = " + ctx.handler());
-//
-//        System.out.println("ctx type = " + ctx.getClass());
-//        System.out.println("pipeline hashcode = " + ctx.pipeline().hashCode() + ", HttpServerHandler hash = " + this.hashCode());
-//        System.out.println("msg type = " + request.getClass());
-//        System.out.println("client addr = " + ctx.channel().remoteAddress());
+            URI uri = new URI(request.uri());
+            if ("/favicon.ico".equals(uri.getPath())) {
+                logger.error("Request favicon.icn, do not response");
+                return;
+            }
+            ByteBuf content = Unpooled.copiedBuffer(JsonUtils.toJsonString(serviceResponse), CharsetUtil.UTF_8);
+            FullHttpResponse response = ResponseUtils.buildCommonHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, HttpContentType.APPLICATION_JSON.getContentType(), content);
 
-        URI uri = new URI(request.uri());
-        if ("/favicon.ico".equals(uri.getPath())) {
-            System.out.println("Request favicon.icn, do not response");
-            return;
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        } catch (Exception e) {
+            logger.error("Exception when handle request !", e);
+//            ByteBuf content = Unpooled.copiedBuffer("Exception when handle request !", CharsetUtil.UTF_8);
+            FullHttpResponse response = ResponseUtils.buildCommonHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, HttpContentType.APPLICATION_JSON.getContentType(), "Exception when handle request !");
+
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         }
-        ByteBuf content = Unpooled.copiedBuffer(JsonUtils.toJsonString(serviceResponse), CharsetUtil.UTF_8);
-        FullHttpResponse response = ResponseUtils.buildCommonHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, HttpContentType.APPLICATION_JSON.getContentType(), content);
 
-//        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
-//        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
-//        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes());
 
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 
     private Object getXWWWFormRequestBody(FullHttpRequest request) {
@@ -122,4 +119,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     public void setManager(Manager manager) {
         this.manager = manager;
     }
+
+//    public static void main(String[] args) {
+//        ServiceRequest request = new ServiceRequest();
+//        request.setServiceId();
+//        request.setParamValueStrings();
+//        request.setParamValues();
+//    }
+
 }
