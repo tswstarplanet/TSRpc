@@ -20,10 +20,11 @@ public class Main {
                         .methodName("primitiveService")
                         .argTypes(new Class[]{String.class, Integer.class})
                         .returnType(String.class))
-                .addDispatcher("reflectDispatcher", (new ReflectDispatcher())
+                .addDispatcher("reflect", (new ReflectDispatcher())
                         .manager(manager))
                 .addServiceObj("primitiveService", new ProviderService())
-                .addTransformer("gsonTransform", new GsonTransformer());
+                .addTransformer("gson", (new GsonTransformer())
+                        .manager(manager));
 
 
 

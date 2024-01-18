@@ -5,20 +5,21 @@ import com.wts.tsrpc.service.ServiceRequest;
 import com.wts.tsrpc.service.ServiceResponse;
 import com.wts.tsrpc.service.ServiceResponseCode;
 import com.wts.tsrpc.utils.Checker;
+import com.wts.tsrpc.utils.GsonUtils;
 import com.wts.tsrpc.utils.HttpContentType;
-import com.wts.tsrpc.utils.JsonUtils;
 import com.wts.tsrpc.utils.ResponseUtils;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
-import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         if (!Checker.HTTP_METHOD_CHECK.getPredicate().test(request.method().name())) {
             ServiceResponse response = ResponseUtils.buildServiceResponse(ServiceResponseCode.INVALID_HTTP_METHOD.getCode(), ServiceResponseCode.INVALID_HTTP_METHOD.getMsg());
-//            ByteBuf content = Unpooled.copiedBuffer(JsonUtils.toJsonString(response), CharsetUtil.UTF_8);
             FullHttpResponse httpResponse = ResponseUtils.buildCommonHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.METHOD_NOT_ALLOWED, HttpContentType.APPLICATION_JSON.getContentType(), response);
             ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
             return;
@@ -79,14 +79,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 logger.error("Request favicon.icn, do not response");
                 return;
             }
-            ByteBuf content = Unpooled.copiedBuffer(JsonUtils.toJsonString(serviceResponse), CharsetUtil.UTF_8);
-            FullHttpResponse response = ResponseUtils.buildCommonHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, HttpContentType.APPLICATION_JSON.getContentType(), content);
+
+            FullHttpResponse response = ResponseUtils.buildCommonHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, HttpContentType.APPLICATION_JSON.getContentType(), serviceResponse);
 
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         } catch (Exception e) {
             logger.error("Exception when handle request !", e);
 //            ByteBuf content = Unpooled.copiedBuffer("Exception when handle request !", CharsetUtil.UTF_8);
-            FullHttpResponse response = ResponseUtils.buildCommonHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, HttpContentType.APPLICATION_JSON.getContentType(), "Exception when handle request !");
+            FullHttpResponse response = ResponseUtils.buildCommonHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, HttpContentType.APPLICATION_JSON.getContentType(), "Exception when handle request: " + e.getMessage());
 
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         }
@@ -120,11 +120,16 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         this.manager = manager;
     }
 
-//    public static void main(String[] args) {
-//        ServiceRequest request = new ServiceRequest();
-//        request.setServiceId();
-//        request.setParamValueStrings();
-//        request.setParamValues();
-//    }
+    public static void main(String[] args) {
+//        List<String> array = GsonUtils.parseObject("[\"abc\",\"def\"]", List.class);
+//        for (String ele : array) {
+//            System.out.println(ele);
+//        }
+        System.out.println(GsonUtils.parseObject("[\"abc\",\"def\"]", Object[].class));
+        ServiceRequest request = new ServiceRequest();
+        request.setServiceId("primitiveService");
+        request.setParamValueStrings(new String[] {"abc", "12"});
+        System.out.println(GsonUtils.toJsonString(request));
+    }
 
 }
