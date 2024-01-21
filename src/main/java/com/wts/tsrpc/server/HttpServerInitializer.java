@@ -1,6 +1,6 @@
 package com.wts.tsrpc.server;
 
-import com.wts.tsrpc.manage.Manager;
+import com.wts.tsrpc.server.manage.Manager;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;

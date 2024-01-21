@@ -1,13 +1,12 @@
-package com.wts.tsrpc;
+package com.wts.tsrpc.test;
 
-import com.wts.tsrpc.manage.Application;
-import com.wts.tsrpc.manage.Manager;
-import com.wts.tsrpc.manage.ReflectDispatcher;
 import com.wts.tsrpc.server.HttpServer;
 import com.wts.tsrpc.server.HttpServerInitializer;
-import com.wts.tsrpc.service.GsonTransformer;
-import com.wts.tsrpc.service.Service;
-import com.wts.tsrpc.test.ProviderService;
+import com.wts.tsrpc.server.manage.Application;
+import com.wts.tsrpc.server.manage.Manager;
+import com.wts.tsrpc.server.manage.ReflectDispatcher;
+import com.wts.tsrpc.server.service.GsonTransformer;
+import com.wts.tsrpc.server.service.Service;
 
 public class Main {
     public static void main(String[] args) {
@@ -15,14 +14,14 @@ public class Main {
         manager.application(new Application()
                         .name("ServiceProvider")
                         .version("1.0"))
-                .addService("primitiveService", (new Service())
+                .addService("complexService", (new Service())
                         .classFullName("com.wts.tsrpc.test.ProviderService")
-                        .methodName("primitiveService")
-                        .argTypes(new Class[]{String.class, Integer.class})
-                        .returnType(String.class))
+                        .methodName("complexService")
+                        .argTypes(new Class[]{Request.class, String.class})
+                        .returnType(Response.class))
                 .addDispatcher("reflect", (new ReflectDispatcher())
                         .manager(manager))
-                .addServiceObj("primitiveService", new ProviderService())
+                .addServiceObj("complexService", new ProviderService())
                 .addTransformer("gson", (new GsonTransformer())
                         .manager(manager));
 

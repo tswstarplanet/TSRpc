@@ -1,6 +1,6 @@
-package com.wts.tsrpc.service;
+package com.wts.tsrpc.server.service;
 
-import com.wts.tsrpc.manage.Manager;
+import com.wts.tsrpc.server.manage.Manager;
 
 public class AbstractTransform implements Transformer {
     private Manager manager;

@@ -1,4 +1,4 @@
-package com.wts.tsrpc.manage;
+package com.wts.tsrpc.server.manage;
 
 public enum SerializationType {
     GSON("gson");

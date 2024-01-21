@@ -1,4 +1,4 @@
-package com.wts.tsrpc.service;
+package com.wts.tsrpc.server.service;
 
 import com.wts.tsrpc.utils.GsonUtils;
 

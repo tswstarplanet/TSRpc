@@ -1,9 +1,9 @@
 package com.wts.tsrpc.server;
 
-import com.wts.tsrpc.manage.Manager;
-import com.wts.tsrpc.service.ServiceRequest;
-import com.wts.tsrpc.service.ServiceResponse;
-import com.wts.tsrpc.service.ServiceResponseCode;
+import com.wts.tsrpc.server.manage.Manager;
+import com.wts.tsrpc.server.service.ServiceRequest;
+import com.wts.tsrpc.server.service.ServiceResponse;
+import com.wts.tsrpc.server.service.ServiceResponseCode;
 import com.wts.tsrpc.utils.Checker;
 import com.wts.tsrpc.utils.GsonUtils;
 import com.wts.tsrpc.utils.HttpContentType;
