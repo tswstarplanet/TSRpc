@@ -1,11 +1,15 @@
 package com.wts.tsrpc.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+
+import java.io.IOException;
 
 public class GsonUtils {
-    private static final Gson gson = new Gson();
+    private static final Gson gson = new GsonBuilder()
+            .serializeNulls()
+            .create();
 
     public static String toJsonString(Object o) {
         return gson.toJson(o);
@@ -17,5 +21,24 @@ public class GsonUtils {
 
     public static JsonArray toJsonArray(String json) {
         return JsonParser.parseString(json).getAsJsonArray();
+    }
+
+    private static class StringTypeAdapter extends TypeAdapter<String> {
+        @Override
+        public void write(JsonWriter out, String value) throws IOException {
+            if (value == null) {
+
+            }
+        }
+
+        @Override
+        public String read(JsonReader in) throws IOException {
+            return null;
+        }
+    }
+
+    public static void main(String[] args) {
+//        System.out.println(toJsonString(""));
+        System.out.println(parseObject(" ", String.class));
     }
 }

@@ -72,7 +72,7 @@ public class Request<B> {
 
 
 //        Type type = request.getClass().getGenericSuperclass();
-        Type type = new TypeToken<Request<RequestBody>>(){}.getType();
+        Type type = new TypeToken<Request2>(){}.getType();
         Request<RequestBody> request1 = gson.fromJson(json1, type);
         System.out.println();
     }

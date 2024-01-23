@@ -1,6 +1,7 @@
 package com.wts.tsrpc.test;
 
 import com.google.common.collect.Lists;
+import com.wts.tsrpc.server.service.ServiceRequest;
 import com.wts.tsrpc.utils.GsonUtils;
 
 import java.lang.reflect.*;
@@ -13,7 +14,7 @@ public class ProviderService {
         return arg1 + ": " + arg2;
     }
 
-    public <T> Response<ResponseBody<SubResponseBody>> complexService(Request<RequestBody<SubRequestBody, SubRequestBody>> request, String code) {
+    public <T> Response<ResponseBody<SubResponseBody>> complexService(Request2 request, String code) {
         Response<ResponseBody<SubResponseBody>> response = new Response<>();
         response.setRspCode("0000");
         response.setCount(2);
@@ -38,21 +39,17 @@ public class ProviderService {
     }
 
     public static void main(String[] args) throws NoSuchMethodException, NoSuchFieldException {
-        test2();
-//        parse("{\"reqId\":\"REQ00001\",\"count\":1,\"body\":{\"code\":\"CODE00001\",\"list\":[\"Hello\",\"Java\"]}}", Request.class, null, null, null);
-        test1();
-        Method method = ProviderService.class.getMethod("complexService", Request.class, String.class);
-        Parameter[] typeParameters = method.getParameters();
-        Type[] genericParameterTypes = method.getGenericParameterTypes();
-        Type[] actualTypeArguments = ((ParameterizedType) genericParameterTypes[0]).getActualTypeArguments();
-//        typeParameters[0].get
-        System.out.println();
-//        method = ProviderService.class.getMethod("func", List.class);
-//        genericParameterTypes = method.getGenericParameterTypes();
-        System.out.println();
+        Request2 request2 = new Request2();
+        RequestBody2 requestBody2 = new RequestBody2();
+        requestBody2.setCode("0001");
+        requestBody2.setMsg("msg1");
+        request2.setRequestBody2(requestBody2);
 
-        Type genericReturnType = method.getGenericReturnType();
-        System.out.println();
+        ServiceRequest serviceRequest = new ServiceRequest();
+        serviceRequest.setServiceId("complexService");
+        serviceRequest.setParamValueStrings(new String[] {GsonUtils.toJsonString(request2), "code1"});
+
+        System.out.println(GsonUtils.toJsonString(serviceRequest));
     }
 
     public static void test1() {

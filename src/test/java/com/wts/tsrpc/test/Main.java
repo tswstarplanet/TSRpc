@@ -2,9 +2,11 @@ package com.wts.tsrpc.test;
 
 import com.wts.tsrpc.server.HttpServer;
 import com.wts.tsrpc.server.HttpServerInitializer;
+import com.wts.tsrpc.server.filter.CheckInvokerFilter;
+import com.wts.tsrpc.server.filter.LogInvokerFilter;
 import com.wts.tsrpc.server.manage.Application;
+import com.wts.tsrpc.server.manage.Dispatcher;
 import com.wts.tsrpc.server.manage.Manager;
-import com.wts.tsrpc.server.manage.ReflectDispatcher;
 import com.wts.tsrpc.server.service.GsonTransformer;
 import com.wts.tsrpc.server.service.Service;
 
@@ -17,13 +19,16 @@ public class Main {
                 .addService("complexService", (new Service())
                         .classFullName("com.wts.tsrpc.test.ProviderService")
                         .methodName("complexService")
-                        .argTypes(new Class[]{Request.class, String.class})
+                        .argTypes(new Class[]{Request2.class, String.class})
                         .returnType(Response.class))
-                .addDispatcher("reflect", (new ReflectDispatcher())
+                .dispatcher(new Dispatcher()
                         .manager(manager))
                 .addServiceObj("complexService", new ProviderService())
                 .addTransformer("gson", (new GsonTransformer())
-                        .manager(manager));
+                        .manager(manager))
+                .serviceInvoker("reflect")
+                .addInvokerFilter(new LogInvokerFilter())
+                .addInvokerFilter(new CheckInvokerFilter());
 
 
 

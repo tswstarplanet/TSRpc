@@ -64,7 +64,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
             ServiceRequest serviceRequest = manager.getTransform(request.headers().get("transformType")).transform(body);
 
-            ServiceResponse serviceResponse = manager.getDispatcher(request.headers().get("dispatcherType")).dispatch(serviceRequest);
+            ServiceResponse serviceResponse = manager.getDispatcher().dispatch(serviceRequest);
 
             logger.info("channel = " + ctx.channel() + ", pipeline = " + ctx.pipeline() + ", channel of pipeline: " + ctx.pipeline().channel());
             logger.info("current handler = " + ctx.handler());

@@ -32,5 +32,11 @@ public class ServiceResponse {
         this.msg = msg;
     }
 
+    public Object getBody() {
+        return body;
+    }
 
+    public void setBody(Object body) {
+        this.body = body;
+    }
 }

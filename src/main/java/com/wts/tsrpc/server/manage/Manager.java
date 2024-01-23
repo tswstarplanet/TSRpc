@@ -1,10 +1,13 @@
 package com.wts.tsrpc.server.manage;
 
 import com.wts.tsrpc.exception.BizException;
+import com.wts.tsrpc.server.filter.InvokerFilter;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.server.service.Transformer;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,6 +22,8 @@ public class Manager {
 
     private final Map<String, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
+    private List<InvokerFilter> defaultInvokerFilters = new ArrayList<>();
+
     private static final Object serviceLock = new Object();
 
     private static final Object objectLock = new Object();
@@ -28,6 +33,14 @@ public class Manager {
     private static final Object dispatcherLock = new Object();
 
     private static final Manager manager = new Manager();
+
+    private String serviceInvoker;
+
+    private Dispatcher dispatcher;
+
+    public Dispatcher getDispatcher() {
+        return dispatcher;
+    }
 
     public static Manager getManager() {
         return manager;
@@ -39,6 +52,11 @@ public class Manager {
 
     public Manager application(Application application) {
         this.application = application;
+        return this;
+    }
+
+    public Manager serviceInvoker(String serviceInvoker) {
+        this.serviceInvoker = serviceInvoker;
         return this;
     }
 
@@ -106,6 +124,16 @@ public class Manager {
         return this;
     }
 
+    public Manager dispatcher(Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+        return this;
+    }
+
+    public Manager addInvokerFilter(InvokerFilter invokerFilter) {
+        defaultInvokerFilters.add(invokerFilter);
+        return this;
+    }
+
     public Service getService(String serviceId) {
         if (StringUtils.isEmpty(serviceId)) {
             throw new BizException("Service id is null !");
@@ -134,6 +162,10 @@ public class Manager {
         return dispatcherMap.get(dispatcherType);
     }
 
+    public List<InvokerFilter> getDefaultInvokerFilters() {
+        return List.copyOf(defaultInvokerFilters);
+    }
+
     public Map<String, Service> getServiceMap() {
         return serviceMap;
     }
@@ -148,5 +180,9 @@ public class Manager {
 
     public void setApplication(Application application) {
         this.application = application;
+    }
+
+    public String getServiceInvoker() {
+        return serviceInvoker;
     }
 }
