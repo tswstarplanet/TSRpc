@@ -1,9 +1,18 @@
 package com.wts.tsrpc.test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.collect.Lists;
-import com.wts.tsrpc.server.service.ServiceRequest;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.wts.tsrpc.utils.GsonUtils;
+import org.springframework.core.GenericTypeResolver;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +23,7 @@ public class ProviderService {
         return arg1 + ": " + arg2;
     }
 
-    public <T> Response<ResponseBody<SubResponseBody>> complexService(Request2 request, String code) {
+    public <T> Response<ResponseBody<SubResponseBody>> complexService(Request<RequestBody<SubRequestBody, SubRequestBody>> request, String code) {
         Response<ResponseBody<SubResponseBody>> response = new Response<>();
         response.setRspCode("0000");
         response.setCount(2);
@@ -38,18 +47,54 @@ public class ProviderService {
 
     }
 
-    public static void main(String[] args) throws NoSuchMethodException, NoSuchFieldException {
-        Request2 request2 = new Request2();
-        RequestBody2 requestBody2 = new RequestBody2();
-        requestBody2.setCode("0001");
-        requestBody2.setMsg("msg1");
-        request2.setRequestBody2(requestBody2);
+    public static void main(String[] args) throws NoSuchMethodException, NoSuchFieldException, IOException {
+        transferGeneric();
+    }
 
-        ServiceRequest serviceRequest = new ServiceRequest();
-        serviceRequest.setServiceId("complexService");
-        serviceRequest.setParamValueStrings(new String[] {GsonUtils.toJsonString(request2), "code1"});
+    public static void transferCommonStr() throws JsonProcessingException {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        String value = "Hello";
+//        String value2 = objectMapper.writeValueAsString(value);
+//        System.out.println(value2);
+//        String value3 = objectMapper.readValue(value, String.class);
+//        System.out.println(value3);
 
-        System.out.println(GsonUtils.toJsonString(serviceRequest));
+        Gson gson = new Gson();
+        String value = "Hello World";
+        String value2 = gson.toJson(value);
+        System.out.println(value2);
+        String value3 = gson.fromJson(value, String.class);
+        System.out.println(value3);
+    }
+
+    public static void transferGeneric() throws NoSuchMethodException, NoSuchFieldException, IOException {
+        Method method = ProviderService.class.getMethod("complexService", Request.class, String.class);
+        Type[] types = method.getGenericParameterTypes();
+        Request<RequestBody<SubRequestBody, SubRequestBody>> request = new Request<>();
+        request.setList(new ArrayList<>(Arrays.asList(new Test("a", 1), new Test("b", 2))));
+        request.setReqId("REQ00001");
+        request.setCount(1L);
+        RequestBody<SubRequestBody, SubRequestBody> body = new RequestBody<>();
+        body.setCode("REQ00002");
+        body.setMsg("请求00001");
+        request.setBody(body);
+        SubRequestBody subRequestBody = new SubRequestBody();
+        subRequestBody.setSubCode("SubCode0001");
+        subRequestBody.setSubList(new ArrayList<>(Arrays.asList(1, 2, 3)));
+        body.setSubBody(subRequestBody);
+        body.setSubBody2(subRequestBody);
+        var gson = new GsonBuilder().serializeNulls().create();
+        System.out.println(gson.toJson(request));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JavaType type1 = objectMapper.constructType(types[0]);
+        GenericTypeResolver.resolveType(type1, ProviderService.class);
+        System.out.println(objectMapper.writeValueAsString(request));
+        String value = objectMapper.writeValueAsString(request);
+        InputStream inputStream = new ByteArrayInputStream(value.getBytes());
+        ObjectReader objectReader = objectMapper.reader().forType(type1);
+        Request<RequestBody<SubRequestBody, SubRequestBody>> request3 = objectReader.readValue(inputStream);
+        System.out.println(GsonUtils.toJsonString(request3));
     }
 
     public static void test1() {
