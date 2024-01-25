@@ -25,7 +25,7 @@ public class Manager {
 
     private final Map<String, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
-    private List<InvokerFilter> defaultInvokerFilters = new ArrayList<>();
+    private final List<InvokerFilter> defaultInvokerFilters = new ArrayList<>();
 
     private static final Object serviceLock = new Object();
 
@@ -45,10 +45,6 @@ public class Manager {
 
     public Dispatcher getDispatcher() {
         return dispatcher;
-    }
-
-    public static Manager getManager() {
-        return manager;
     }
 
     public Manager() {
@@ -139,21 +135,21 @@ public class Manager {
         return this;
     }
 
-    public Manager addDispatcher(String dispatcherType, Dispatcher dispatcher) {
-        if (StringUtils.isEmpty(dispatcherType)) {
-            throw new BizException("ServiceId can not be empty !");
-        }
-        if (dispatcher == null) {
-            throw new BizException("Service can not be null !");
-        }
-        synchronized (dispatcherLock) {
-            if (dispatcherMap.containsKey(dispatcherType)) {
-                throw new BizException("The object has been exist in the object map !");
-            }
-            dispatcherMap.put(dispatcherType, dispatcher);
-        }
-        return this;
-    }
+//    public Manager addDispatcher(String dispatcherType, Dispatcher dispatcher) {
+//        if (StringUtils.isEmpty(dispatcherType)) {
+//            throw new BizException("ServiceId can not be empty !");
+//        }
+//        if (dispatcher == null) {
+//            throw new BizException("Service can not be null !");
+//        }
+//        synchronized (dispatcherLock) {
+//            if (dispatcherMap.containsKey(dispatcherType)) {
+//                throw new BizException("The object has been exist in the object map !");
+//            }
+//            dispatcherMap.put(dispatcherType, dispatcher);
+//        }
+//        return this;
+//    }
 
     public Manager dispatcher(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
@@ -186,31 +182,15 @@ public class Manager {
         return transformerMap.get(transformType);
     }
 
-    public Dispatcher getDispatcher(String dispatcherType) {
-        if (StringUtils.isEmpty(dispatcherType)) {
-            throw new BizException("Dispatcher type is empty !");
-        }
-        return dispatcherMap.get(dispatcherType);
-    }
+//    public Dispatcher getDispatcher(String dispatcherType) {
+//        if (StringUtils.isEmpty(dispatcherType)) {
+//            throw new BizException("Dispatcher type is empty !");
+//        }
+//        return dispatcherMap.get(dispatcherType);
+//    }
 
     public List<InvokerFilter> getDefaultInvokerFilters() {
         return List.copyOf(defaultInvokerFilters);
-    }
-
-    public Map<String, Service> getServiceMap() {
-        return serviceMap;
-    }
-
-    public void setServiceMap(Map<String, Service> serviceMap) {
-        this.serviceMap = serviceMap;
-    }
-
-    public Application getApplication() {
-        return application;
-    }
-
-    public void setApplication(Application application) {
-        this.application = application;
     }
 
     public String getServiceInvoker() {
