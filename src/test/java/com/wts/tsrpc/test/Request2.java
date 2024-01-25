@@ -36,7 +36,7 @@ public class Request2 {
         requestBody2.setMsg("msg00002");
         request2.setRequestBody2(requestBody2);
 
-        serviceRequest.setParamValueStrings(new String[]{GsonUtils.toJsonString(request2), "arg1"});
+//        serviceRequest.setParamValueStrings(new String[]{GsonUtils.toJsonString(request2), "arg1"});
         System.out.println(GsonUtils.toJsonString(serviceRequest));
     }
 }

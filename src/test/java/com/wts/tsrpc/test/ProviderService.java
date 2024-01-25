@@ -5,10 +5,9 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.wts.tsrpc.server.service.ServiceRequest;
 import com.wts.tsrpc.utils.GsonUtils;
-import org.springframework.core.GenericTypeResolver;
+import com.wts.tsrpc.utils.JacksonUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,7 +22,7 @@ public class ProviderService {
         return arg1 + ": " + arg2;
     }
 
-    public <T> Response<ResponseBody<SubResponseBody>> complexService(Request<RequestBody<SubRequestBody, SubRequestBody>> request, String code) {
+    public <T> Response<ResponseBody<SubResponseBody>> complexService(Request<RequestBody<SubRequestBody, SubRequestBody>> request, String test) {
         Response<ResponseBody<SubResponseBody>> response = new Response<>();
         response.setRspCode("0000");
         response.setCount(2);
@@ -52,19 +51,24 @@ public class ProviderService {
     }
 
     public static void transferCommonStr() throws JsonProcessingException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        String value = "Hello";
-//        String value2 = objectMapper.writeValueAsString(value);
-//        System.out.println(value2);
-//        String value3 = objectMapper.readValue(value, String.class);
-//        System.out.println(value3);
 
-        Gson gson = new Gson();
-        String value = "Hello World";
-        String value2 = gson.toJson(value);
+        Test test = new Test("a1", 1);
+        String json = JacksonUtils.toJsonString(test);
+
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String value = "Hello";
+        String value2 = objectMapper.writeValueAsString(value);
         System.out.println(value2);
-        String value3 = gson.fromJson(value, String.class);
+        String value3 = objectMapper.readValue(value, String.class);
         System.out.println(value3);
+
+//        Gson gson = new Gson();
+//        String value = "Hello World";
+//        String value2 = gson.toJson(value);
+//        System.out.println(value2);
+//        String value3 = gson.fromJson(value, String.class);
+//        System.out.println(value3);
     }
 
     public static void transferGeneric() throws NoSuchMethodException, NoSuchFieldException, IOException {
@@ -83,18 +87,38 @@ public class ProviderService {
         subRequestBody.setSubList(new ArrayList<>(Arrays.asList(1, 2, 3)));
         body.setSubBody(subRequestBody);
         body.setSubBody2(subRequestBody);
-        var gson = new GsonBuilder().serializeNulls().create();
-        System.out.println(gson.toJson(request));
+
+        ServiceRequest serviceRequest = new ServiceRequest();
+        serviceRequest.setServiceId("complexService");
+        serviceRequest.setParamValueStrings(new String[]{JacksonUtils.toJsonString(request), "hello"});
+
+
+        System.out.println(JacksonUtils.toJsonString(serviceRequest));
 
         ObjectMapper objectMapper = new ObjectMapper();
         JavaType type1 = objectMapper.constructType(types[0]);
-        GenericTypeResolver.resolveType(type1, ProviderService.class);
+//        GenericTypeResolver.resolveType(type1, ProviderService.class);
         System.out.println(objectMapper.writeValueAsString(request));
         String value = objectMapper.writeValueAsString(request);
         InputStream inputStream = new ByteArrayInputStream(value.getBytes());
         ObjectReader objectReader = objectMapper.reader().forType(type1);
         Request<RequestBody<SubRequestBody, SubRequestBody>> request3 = objectReader.readValue(inputStream);
         System.out.println(GsonUtils.toJsonString(request3));
+
+
+//        Test test = null;
+//        int test = 1234;
+        String test = " Hello world ! ";
+
+        type1 = objectMapper.constructType(types[1]);
+        String testStr = objectMapper.writeValueAsString(test);
+        System.out.println(testStr);
+        InputStream inputStream1 = new ByteArrayInputStream(testStr.getBytes());
+        ObjectReader objectReader1 = objectMapper.reader().forType(type1);
+        String test1 = objectReader1.readValue(inputStream1);
+        System.out.println();
+
+
     }
 
     public static void test1() {

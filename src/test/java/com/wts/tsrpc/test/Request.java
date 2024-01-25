@@ -77,7 +77,7 @@ public class Request<B> {
         var gson = new Gson();
         System.out.println(gson.toJson(request));
 
-        serviceRequest.setParamValueStrings(new String[]{ GsonUtils.toJsonString(request), "Sun"});
+//        serviceRequest.setParamValueStrings(new String[]{ GsonUtils.toJsonString(request), "Sun"});
 
 
         MyParameterizedType requestBodyParamType = new MyParameterizedType(RequestBody.class, new Type[] {SubRequestBody.class, SubRequestBody.class});

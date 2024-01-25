@@ -1,6 +1,6 @@
 package com.wts.tsrpc.test;
 
-import com.wts.tsrpc.server.service.GsonTransformer;
+import com.wts.tsrpc.server.service.JsonTransformer;
 import com.wts.tsrpc.server.service.ParameterType;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.server.service.ServiceRequest;
@@ -110,12 +110,12 @@ public class RequestBody<S, X> {
         service.setParameterTypes(parameterTypes.toArray(new ParameterType[0]));
         ServiceRequest serviceRequest = new ServiceRequest();
         serviceRequest.setServiceId("");
-        serviceRequest.setParamValueStrings(new String[] {"[[{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}},{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}}],[{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}},{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}}]]", "arg1"});
-        serviceRequest.setParamValues(new Object[serviceRequest.getParamValueStrings().length]);
+//        serviceRequest.setParamValueStrings(new String[] {"[[{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}},{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}}],[{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}},{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}}]]", "arg1"});
+//        serviceRequest.setParamValues(new Object[serviceRequest.getParamValueStrings().length]);
 
-        GsonTransformer gsonTransformer = new GsonTransformer();
+        JsonTransformer jsonTransformer = new JsonTransformer();
 
-        gsonTransformer.transform(service, serviceRequest);
+//        jsonTransformer.transform(service, serviceRequest);
     }
 
 
