@@ -1,17 +1,15 @@
 package com.wts.tsrpc.server.manage;
 
+import com.wts.tsrpc.client.ClientService;
 import com.wts.tsrpc.exception.BizException;
 import com.wts.tsrpc.server.filter.InvokerFilter;
-import com.wts.tsrpc.server.service.Service;
+import com.wts.tsrpc.common.Service;
 import com.wts.tsrpc.server.service.Transformer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Manager {
@@ -37,7 +35,11 @@ public class Manager {
 
     private static final Manager manager = new Manager();
 
-    private static final Map<String, List<Type>> serviceParamTypeMap = new ConcurrentHashMap<>();
+    private final Map<String, List<Type>> serviceParamTypeMap = new ConcurrentHashMap<>();
+
+    private final Map<String, Type> serviceReturnValueTypeMap = new ConcurrentHashMap<>();
+
+    private final Map<String, Map<String, ClientService>> clientServiceMap = new ConcurrentHashMap<>();
 
     private String serviceInvoker;
 
@@ -81,6 +83,56 @@ public class Manager {
         } catch (NoSuchMethodException e) {
             throw new BizException(STR."Method of methodName: \{service.getMethodName()} and args: \{(new ArrayList<>(Arrays.asList(service.getArgTypes()))).toString()} not found !");
         }
+    }
+
+    public Manager addClientService(String applicationId, String serviceId, ClientService clientService) {
+        if (StringUtils.isEmpty(applicationId)) {
+            throw new BizException("Application id is empty !");
+        }
+        if (StringUtils.isEmpty(serviceId)) {
+            throw new BizException("Service id is empty !");
+        }
+        Map<String, ClientService> tempServiceMap = clientServiceMap.computeIfAbsent(applicationId, key -> new ConcurrentHashMap<>());
+        if (tempServiceMap.containsKey(serviceId)) {
+            throw new BizException(STR."Client Service of serviceId [\{serviceId}] has been existed !");
+        }
+        try {
+            Method method = Class.forName(clientService.getClientClassFullName())
+                    .getMethod(clientService.getClientMethodName(), clientService.getArgTypes());
+            clientService.setParamTypes(new ArrayList<>(Arrays.asList(method.getGenericParameterTypes())));
+            clientService.setReturnGenericType(method.getGenericReturnType());
+            return this;
+        } catch (ClassNotFoundException e) {
+            throw new BizException(STR."Class of \{clientService.getClientClassFullName()} not found !");
+        } catch (NoSuchMethodException e) {
+            throw new BizException(STR."Method of methodName: \{clientService.getClientMethodName()} and args: \{(new ArrayList<>(Arrays.asList(clientService.getArgTypes()))).toString()} not found !");
+        }
+    }
+
+    public Manager addServiceReturnValueType(String serviceId, Service service) {
+        if (StringUtils.isEmpty(serviceId)) {
+            throw new BizException("ServiceId can not be empty !");
+        }
+        if (service == null) {
+            throw new BizException("Service can not be null !");
+        }
+        if (serviceReturnValueTypeMap.containsKey(serviceId)) {
+            throw new BizException(STR."Param type of service \{serviceId} has been existed in the map !");
+        }
+        try {
+            Method method = Class.forName(service.getClassFullName()).getMethod(service.getMethodName(), service.getArgTypes());
+            Type type = method.getGenericReturnType();
+            serviceReturnValueTypeMap.put(serviceId, type);
+            return this;
+        } catch (ClassNotFoundException e) {
+            throw new BizException(STR."Class of \{service.getClassFullName()} not found !");
+        } catch (NoSuchMethodException e) {
+            throw new BizException(STR."Method of methodName: \{service.getMethodName()} and args: \{(new ArrayList<>(Arrays.asList(service.getArgTypes()))).toString()} not found !");
+        }
+    }
+
+    public Type getServiceReturnValueType(String serviceId) {
+        return serviceReturnValueTypeMap.get(serviceId);
     }
 
     public List<Type> getParamTypes(String serviceId) {

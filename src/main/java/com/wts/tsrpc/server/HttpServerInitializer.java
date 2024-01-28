@@ -19,8 +19,8 @@ public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel ch) {
         var pipeline = ch.pipeline();
 
-        pipeline.addLast("Http-Encoder&Decoder", new HttpServerCodec())
-                .addLast("Http-Aggregator", new HttpObjectAggregator(1024 * 1024))
+        pipeline.addLast("Http-Server-Encoder&Decoder", new HttpServerCodec())
+                .addLast("Http-Server-Aggregator", new HttpObjectAggregator(1024 * 1024))
                 .addLast("Http-Server-Handler", (new HttpServerHandler())
                         .manager(manager));
     }

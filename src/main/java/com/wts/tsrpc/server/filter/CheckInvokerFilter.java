@@ -1,7 +1,7 @@
 package com.wts.tsrpc.server.filter;
 
-import com.wts.tsrpc.server.service.ServiceRequest;
-import com.wts.tsrpc.server.service.ServiceResponse;
+import com.wts.tsrpc.common.ServiceRequest;
+import com.wts.tsrpc.common.ServiceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,14 +1,14 @@
 package com.wts.tsrpc.server;
 
+import com.wts.tsrpc.common.HttpUtils;
+import com.wts.tsrpc.common.ServiceRequest;
+import com.wts.tsrpc.common.ServiceResponse;
+import com.wts.tsrpc.common.ServiceResponseCode;
 import com.wts.tsrpc.server.manage.Manager;
-import com.wts.tsrpc.server.service.ServiceRequest;
-import com.wts.tsrpc.server.service.ServiceResponse;
-import com.wts.tsrpc.server.service.ServiceResponseCode;
-import com.wts.tsrpc.utils.Checker;
-import com.wts.tsrpc.utils.GsonUtils;
-import com.wts.tsrpc.utils.HttpContentType;
-import com.wts.tsrpc.utils.ResponseUtils;
-import io.netty.buffer.ByteBuf;
+import com.wts.tsrpc.common.utils.Checker;
+import com.wts.tsrpc.common.utils.GsonUtils;
+import com.wts.tsrpc.common.utils.HttpContentType;
+import com.wts.tsrpc.common.utils.ResponseUtils;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,11 +57,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             logger.info("uri: {}", request.uri());
             logger.info("http version: " + request.protocolVersion().text());
             logger.info("head: " + request.headers().toString());
-            logger.info("request body: " + getBody(request));
+            logger.info("request body: " + HttpUtils.getBody(request));
 
-            String body = getBody(request);
+            String body = HttpUtils.getBody(request);
 
-            ServiceRequest serviceRequest = manager.getTransform(request.headers().get("transformType")).transform(body);
+            ServiceRequest serviceRequest = manager.getTransform(request.headers().get("transformType")).transformRequest(body);
 
             ServiceResponse serviceResponse = manager.getDispatcher().dispatch(serviceRequest);
 
@@ -107,10 +106,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         return params;
     }
 
-    private String getBody(FullHttpRequest request) {
-        ByteBuf buf = request.content();
-        return buf.toString(StandardCharsets.UTF_8);
-    }
+
 
     public Manager getManager() {
         return manager;
