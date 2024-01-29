@@ -5,6 +5,8 @@ import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.server.manage.Manager;
 
+import java.lang.reflect.Type;
+
 public class AbstractTransform implements Transformer {
     private Manager manager;
 
@@ -30,6 +32,16 @@ public class AbstractTransform implements Transformer {
 
     @Override
     public ServiceResponse transformResponse(String body) {
+        return null;
+    }
+
+    @Override
+    public String transformObjectToString(Object object) {
+        return null;
+    }
+
+    @Override
+    public Object transformReturnValueObject(String body, Type type) {
         return null;
     }
 

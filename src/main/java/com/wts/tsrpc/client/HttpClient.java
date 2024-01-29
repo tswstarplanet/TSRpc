@@ -1,6 +1,7 @@
 package com.wts.tsrpc.client;
 
 import com.wts.tsrpc.exception.BizException;
+import com.wts.tsrpc.server.manage.Manager;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -22,6 +23,8 @@ public class HttpClient {
 
     private static final Map<Endpoint, HttpClient> httpClientMap = new ConcurrentHashMap<>();
 
+    private Manager manager;
+
     private final Integer workNum;
 
     private Bootstrap bootstrap;
@@ -36,17 +39,31 @@ public class HttpClient {
         this.host = host;
         this.port = port;
         this.workNum = workNum;
+    }
+
+    public HttpClient init() {
         bootstrap = (new Bootstrap())
                 .group(new NioEventLoopGroup(workNum))
                 .handler(new LoggingHandler(LogLevel.DEBUG))
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
-                .handler(new HttpClientInitializer());
+                .handler((new HttpClientInitializer()).manager(manager));
+        return this;
     }
 
     public ChannelFuture connect() {
-        this.channelFuture = bootstrap.connect(host, port);
-        return channelFuture;
+//        try {
+//            this.channelFuture = bootstrap.connect(host, port).sync();
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+//        return channelFuture;
+        return this.channelFuture = bootstrap.connect(host, port);
+    }
+
+    public HttpClient manager(Manager manager) {
+        this.manager = manager;
+        return this;
     }
 
     public ChannelFuture sendMsg(String msg) {
@@ -54,14 +71,17 @@ public class HttpClient {
                 , Unpooled.wrappedBuffer(msg.getBytes(StandardCharsets.UTF_8)));
         request.headers().set(HttpHeaderNames.HOST, host)
                 .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE)
-                .set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes());
+                .set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes())
+                .set("transformType", "jackson");
         channelFuture.channel().write(request);
         channelFuture.channel().flush();
-        try {
-            return channelFuture.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            throw new BizException(STR."Send msg error: \{e.getMessage()}");
-        }
+//        try {
+//            return channelFuture.channel().closeFuture().sync();
+            return channelFuture.channel().closeFuture();
+//        }
+//        catch (InterruptedException e) {
+//            throw new BizException(STR."Send msg error: \{e.getMessage()}");
+//        }
     }
 
     public static HttpClient getHttpClient(Endpoint endpoint) {
@@ -75,6 +95,6 @@ public class HttpClient {
         if (endpoint == null) {
             throw new BizException("Endpoint object is null !");
         }
-        return httpClientMap.computeIfAbsent(endpoint, _ -> httpClientMap.put(endpoint, httpClient));
+        return httpClientMap.putIfAbsent(endpoint, httpClient) != null ? httpClientMap.get(endpoint) : httpClient;
     }
 }

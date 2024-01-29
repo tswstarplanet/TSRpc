@@ -42,6 +42,7 @@ public class Dispatcher {
         filterChain.setServiceInvoker(invoker);
 
         ServiceResponse response = new ServiceResponse();
+        response.setRequestId(request.getRequestId());
         filterChain.doFilter(request, response, filterChain);
         return response;
     }

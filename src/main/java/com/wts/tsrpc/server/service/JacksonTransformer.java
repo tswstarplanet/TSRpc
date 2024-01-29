@@ -7,6 +7,7 @@ import com.wts.tsrpc.common.utils.JacksonUtils;
 import com.wts.tsrpc.common.utils.SerialNoUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 
 public class JacksonTransformer extends AbstractTransform {
@@ -51,7 +52,7 @@ public class JacksonTransformer extends AbstractTransform {
             request.setParamValueStrings(new String[arguments.length]);
         }
         for (int i = 0; i < arguments.length; i++) {
-            request.getParamValueStrings()[i] = JacksonUtils.toJsonString(arguments[0]);
+            request.getParamValueStrings()[i] = JacksonUtils.toJsonString(arguments[i]);
         }
         request.setRequestTime(LocalDateTime.now());
         return request;
@@ -60,6 +61,16 @@ public class JacksonTransformer extends AbstractTransform {
     @Override
     public String transformRequestToString(ServiceRequest request) {
         return JacksonUtils.toJsonString(request);
+    }
+
+    @Override
+    public String transformObjectToString(Object object) {
+        return JacksonUtils.toJsonString(object);
+    }
+
+    @Override
+    public Object transformReturnValueObject(String body, Type type) {
+        return JacksonUtils.parseObject(body, type);
     }
 
     //    public ServiceRequest transform(Service service, ServiceRequest request) {

@@ -81,6 +81,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
             FullHttpResponse response = ResponseUtils.buildCommonHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, HttpContentType.APPLICATION_JSON.getContentType(), serviceResponse);
 
+            response.headers().set("transformType", "jackson");
+
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         } catch (Exception e) {
             logger.error("Exception when handle request !", e);
