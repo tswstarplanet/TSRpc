@@ -1,5 +1,6 @@
 package com.wts.tsrpc.server.manage;
 
+import com.wts.tsrpc.client.ClientInvoker;
 import com.wts.tsrpc.client.ClientService;
 import com.wts.tsrpc.exception.BizException;
 import com.wts.tsrpc.server.filter.InvokerFilter;
@@ -40,6 +41,8 @@ public class Manager {
     private final Map<String, Type> serviceReturnValueTypeMap = new ConcurrentHashMap<>();
 
     private final Map<String, Map<String, ClientService>> clientServiceMap = new ConcurrentHashMap<>();
+
+    private final Map<String, Map<String, ClientInvoker>> clientInvokerMap = new ConcurrentHashMap<>();
 
     private String serviceInvoker;
 
@@ -85,6 +88,25 @@ public class Manager {
         }
     }
 
+    public ClientInvoker getClientInvoker(String applicationKey, String serviceId) {
+        return clientInvokerMap.get(applicationKey).get(serviceId);
+    }
+
+    public Manager addClientInvoker(String applicationKey, String serviceId, ClientInvoker clientInvoker) {
+        if (StringUtils.isEmpty(applicationKey)) {
+            throw new BizException("Application id is empty !");
+        }
+        if (StringUtils.isEmpty(serviceId)) {
+            throw new BizException("Service id is empty !");
+        }
+        Map<String, ClientInvoker> tempInvokerMap = clientInvokerMap.computeIfAbsent(applicationKey, _ -> new ConcurrentHashMap<>());
+        if (tempInvokerMap.containsKey(serviceId)) {
+            throw new BizException(STR."Client Invoker of serviceId [\{serviceId}] has been existed !");
+        }
+        tempInvokerMap.putIfAbsent(serviceId, clientInvoker);
+        return this;
+    }
+
     public Manager addClientService(String applicationId, String serviceId, ClientService clientService) {
         if (StringUtils.isEmpty(applicationId)) {
             throw new BizException("Application id is empty !");
@@ -92,7 +114,7 @@ public class Manager {
         if (StringUtils.isEmpty(serviceId)) {
             throw new BizException("Service id is empty !");
         }
-        Map<String, ClientService> tempServiceMap = clientServiceMap.computeIfAbsent(applicationId, key -> new ConcurrentHashMap<>());
+        Map<String, ClientService> tempServiceMap = clientServiceMap.computeIfAbsent(applicationId, _ -> new ConcurrentHashMap<>());
         if (tempServiceMap.containsKey(serviceId)) {
             throw new BizException(STR."Client Service of serviceId [\{serviceId}] has been existed !");
         }

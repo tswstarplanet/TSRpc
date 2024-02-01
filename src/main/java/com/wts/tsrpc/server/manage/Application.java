@@ -32,4 +32,8 @@ public class Application {
     public String getVersion() {
         return version;
     }
+
+    public String getKey() {
+        return STR."\{name}:\{version}";
+    }
 }

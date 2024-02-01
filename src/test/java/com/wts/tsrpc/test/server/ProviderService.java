@@ -42,12 +42,19 @@ public class ProviderService {
         return response;
     }
 
+    public void func2() {
+
+    }
+
     public void func(List<List<String>> list) {
 
     }
 
     public static void main(String[] args) throws NoSuchMethodException, NoSuchFieldException, IOException {
-        transferGeneric();
+//        transferGeneric();
+        Method method = ProviderService.class.getMethod("func2");
+        Class<?>[] argTypes = method.getParameterTypes();
+        System.out.println();
     }
 
     public static void transferCommonStr() throws JsonProcessingException {
@@ -70,6 +77,14 @@ public class ProviderService {
 //        String value3 = gson.fromJson(value, String.class);
 //        System.out.println(value3);
     }
+
+//    public void generateParam(Type type, String param) {
+//        if (type instanceof Class<?>) {
+//            param = "" + param;
+//            return;
+//        }
+//        param =
+//    }
 
     public static void transferGeneric() throws NoSuchMethodException, NoSuchFieldException, IOException {
         Method method = ProviderService.class.getMethod("complexService", Request.class, String.class);

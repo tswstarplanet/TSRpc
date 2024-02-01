@@ -3,7 +3,9 @@ package com.wts.tsrpc.test.client;
 import com.wts.tsrpc.client.ClientInvoker;
 import com.wts.tsrpc.client.ClientService;
 import com.wts.tsrpc.client.RandomLoadBalancer;
+import com.wts.tsrpc.common.proxy.ClassTool;
 import com.wts.tsrpc.common.utils.JacksonUtils;
+import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.Manager;
 import com.wts.tsrpc.server.service.JacksonTransformer;
 import com.wts.tsrpc.test.server.*;
@@ -17,8 +19,12 @@ public class Main {
 //        HttpClient client = (new HttpClient("localhost", 8866, 10))
 //                .manager(manager);
         ClientService clientService = new ClientService();
+        Application application = (new Application())
+                .name("ServerApplication1")
+                .version("1.0");
         clientService.setServiceId("complexService");
-        clientService.setApplicationId("ServerApplication1");
+        clientService.setApplicationId(application.getName());
+        clientService.setApplicationVersion(application.getVersion());
         clientService.setArgTypes(new Class[]{Request.class, String.class});
         clientService.setClientClassFullName("com.wts.tsrpc.test.client.IProviderService");
         clientService.setClientMethodName("complexService");
@@ -29,6 +35,12 @@ public class Main {
         clientInvoker.clientService(clientService)
                 .manager(manager)
                 .loadBalancer(new RandomLoadBalancer());
+        manager.addClientInvoker(application.getKey(), clientService.getServiceId(), clientInvoker);
+
+        ClassTool classTool = new ClassTool();
+        classTool.manager(manager);
+        IProviderService iProviderService = (IProviderService) classTool
+                .createClientServiceProxy(IProviderService.class, IProviderService.class.getDeclaredMethods(), application, clientService);
 
         Request<RequestBody<SubRequestBody, SubRequestBody>> request = new Request<>();
         request.setList(new ArrayList<>(Arrays.asList(new Test("a", 1), new Test("b", 2))));
@@ -44,7 +56,9 @@ public class Main {
         body.setSubBody(subRequestBody);
         body.setSubBody2(subRequestBody);
 
-        Response<ResponseBody<SubResponseBody>> response = (Response<ResponseBody<SubResponseBody>>) clientInvoker.invoke(new Object[]{request, "arg1"});
+//        Response<ResponseBody<SubResponseBody>> response = (Response<ResponseBody<SubResponseBody>>) clientInvoker.invoke(new Object[]{request, "arg1"});
+
+        Response<ResponseBody<SubResponseBody>> response = iProviderService.complexService(request, "arg1");
 
         System.out.println(JacksonUtils.toJsonString(response));
 //        Method method = IProviderService.class.getMethod("complexService", Request.class, String.class);

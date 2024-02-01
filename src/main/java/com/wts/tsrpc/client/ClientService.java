@@ -13,6 +13,8 @@ public class ClientService {
 
     private String applicationId;
 
+    private String applicationVersion;
+
     private String serviceId;
 
     private List<Type> paramTypes;
@@ -51,6 +53,14 @@ public class ClientService {
 
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
+    }
+
+    public String getApplicationVersion() {
+        return applicationVersion;
+    }
+
+    public void setApplicationVersion(String applicationVersion) {
+        this.applicationVersion = applicationVersion;
     }
 
     public String getServiceId() {
