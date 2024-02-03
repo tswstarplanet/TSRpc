@@ -5,12 +5,12 @@ import com.wts.tsrpc.common.ServiceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CheckInvokerFilter implements InvokerFilter {
+public class CheckServerInvokerFilter implements ServerInvokerFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(CheckInvokerFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(CheckServerInvokerFilter.class);
 
     @Override
-    public void doFilter(ServiceRequest request, ServiceResponse response, InvokerFilterChain filterChain) {
+    public void doFilter(ServiceRequest request, ServiceResponse response, ServerInvokerFilterChain filterChain) {
         logger.info("Check invoker filter !");
         filterChain.doFilter(request, response, filterChain);
     }

@@ -77,7 +77,7 @@ public class HttpClient {
         channelFuture.channel().flush();
 //        try {
 //            return channelFuture.channel().closeFuture().sync();
-            return channelFuture.channel().closeFuture();
+        return channelFuture.channel().closeFuture();
 //        }
 //        catch (InterruptedException e) {
 //            throw new BizException(STR."Send msg error: \{e.getMessage()}");

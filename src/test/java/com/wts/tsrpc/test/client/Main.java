@@ -3,6 +3,8 @@ package com.wts.tsrpc.test.client;
 import com.wts.tsrpc.client.ClientInvoker;
 import com.wts.tsrpc.client.ClientService;
 import com.wts.tsrpc.client.RandomLoadBalancer;
+import com.wts.tsrpc.client.filter.CheckClientInvokerFilter;
+import com.wts.tsrpc.client.filter.LogClientInvokerFilter;
 import com.wts.tsrpc.common.proxy.ClassTool;
 import com.wts.tsrpc.common.utils.JacksonUtils;
 import com.wts.tsrpc.server.manage.Application;
@@ -36,6 +38,8 @@ public class Main {
                 .manager(manager)
                 .loadBalancer(new RandomLoadBalancer());
         manager.addClientInvoker(application.getKey(), clientService.getServiceId(), clientInvoker);
+        manager.addClientInvokerFilter(new LogClientInvokerFilter())
+                .addClientInvokerFilter(new CheckClientInvokerFilter());
 
         ClassTool classTool = new ClassTool();
         classTool.manager(manager);
@@ -56,14 +60,8 @@ public class Main {
         body.setSubBody(subRequestBody);
         body.setSubBody2(subRequestBody);
 
-//        Response<ResponseBody<SubResponseBody>> response = (Response<ResponseBody<SubResponseBody>>) clientInvoker.invoke(new Object[]{request, "arg1"});
-
         Response<ResponseBody<SubResponseBody>> response = iProviderService.complexService(request, "arg1");
 
         System.out.println(JacksonUtils.toJsonString(response));
-//        Method method = IProviderService.class.getMethod("complexService", Request.class, String.class);
-//        Type[] types = method.getGenericParameterTypes();
-//        Type returnType = method.getGenericReturnType();
-//        clientService.set
     }
 }

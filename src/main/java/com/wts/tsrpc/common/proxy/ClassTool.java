@@ -32,7 +32,7 @@ public class ClassTool {
 
     public Object createClientServiceProxy(Class<?> clientServiceClazz, Method[] methods, Application application, ClientService clientService) {
         proxyNameNoMap.putIfAbsent(clientServiceClazz.getName(), new AtomicInteger());
-        CtClass cc = classPool.makeClass(STR."\{clientServiceClazz.getPackageName()}.\{clientServiceClazz.getSimpleName()}Subclass\{proxyNameNoMap.get(clientServiceClazz.getName())}");
+        CtClass cc = classPool.makeClass(STR."\{clientServiceClazz.getPackageName()}.\{clientServiceClazz.getSimpleName()}Subclass\{proxyNameNoMap.get(clientServiceClazz.getName()).getAndIncrement()}");
         try {
             if (clientServiceClazz.isInterface()) {
                 cc.setInterfaces(new CtClass[]{classPool.get(clientServiceClazz.getName())});
@@ -46,12 +46,6 @@ public class ClassTool {
             CtConstructor cons = new CtConstructor(new CtClass[]{classPool.get(ClientInvoker.class.getName())}, cc);
             cons.setBody("{ $0.clientInvoker = $1; }");
             cc.addConstructor(cons);
-
-//            // 6. 创建一个名为printName方法，无参数，无返回值，输出name值
-//            CtMethod ctMethod = new CtMethod(classPool.getCtClass(String.class.getName()), "printName", new CtClass[]{}, cc);
-//            ctMethod.setModifiers(Modifier.PUBLIC);
-//            ctMethod.setBody("{System.out.println(\"Hello\"); return null;}");
-//            cc.addMethod(ctMethod);
 
             for (Method method : methods) {
                 String methodName = method.getName();
@@ -76,12 +70,8 @@ public class ClassTool {
                 cc.addMethod(ctMethod);
             }
             cc.writeFile("log4j2_logs/");
-//            return null;
-//            return cc.toClass().getConstructor(ClientInvoker.class).newInstance(manager.getClientInvoker(application.getKey(), clientService.getServiceId()));
             Class<?> clazz = cc.toClass();
-            Method[] methods1 = clazz.getDeclaredMethods();
             return clazz.getConstructor(ClientInvoker.class).newInstance(manager.getClientInvoker(application.getKey(), clientService.getServiceId()));
-//            return clazz.getConstructor(ClientInvoker.class).newInstance(null);
         } catch (CannotCompileException e) {
             throw new BizException(STR."The class [\{clientServiceClazz.getName()} can not be compiled !");
         } catch (NotFoundException e) {

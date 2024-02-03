@@ -2,8 +2,8 @@ package com.wts.tsrpc.test.server;
 
 import com.wts.tsrpc.server.HttpServer;
 import com.wts.tsrpc.server.HttpServerInitializer;
-import com.wts.tsrpc.server.filter.CheckInvokerFilter;
-import com.wts.tsrpc.server.filter.LogInvokerFilter;
+import com.wts.tsrpc.server.filter.CheckServerInvokerFilter;
+import com.wts.tsrpc.server.filter.LogServerInvokerFilter;
 import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.Dispatcher;
 import com.wts.tsrpc.server.manage.Manager;
@@ -28,8 +28,8 @@ public class Main {
                 .addTransformer("jackson", (new JacksonTransformer())
                         .manager(manager))
                 .serviceInvoker("reflect")
-                .addInvokerFilter(new LogInvokerFilter())
-                .addInvokerFilter(new CheckInvokerFilter())
+                .addServiceInvokerFilter(new LogServerInvokerFilter())
+                .addServiceInvokerFilter(new CheckServerInvokerFilter())
                 .addServiceParamType("complexService", service);
 
 

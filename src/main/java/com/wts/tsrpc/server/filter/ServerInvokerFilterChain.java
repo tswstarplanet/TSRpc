@@ -8,7 +8,7 @@ import com.wts.tsrpc.common.ServiceResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InvokerFilterChain implements InvokerFilter {
+public class ServerInvokerFilterChain implements ServerInvokerFilter {
 
     private int pos = 0;
 
@@ -16,14 +16,14 @@ public class InvokerFilterChain implements InvokerFilter {
 
     private ServiceInvoker serviceInvoker;
 
-    private List<InvokerFilter> invokerFilters;
+    private List<ServerInvokerFilter> invokerFilters = new ArrayList<>();
 
-    public InvokerFilterChain() {
+    public ServerInvokerFilterChain() {
     }
 
 
 
-    public void addFilter(InvokerFilter invokerFilter) {
+    public void addFilter(ServerInvokerFilter invokerFilter) {
         if (invokerFilters == null) {
             invokerFilters = new ArrayList<>();
         }
@@ -31,7 +31,7 @@ public class InvokerFilterChain implements InvokerFilter {
     }
 
     @Override
-    public void doFilter(ServiceRequest serviceRequest, ServiceResponse serviceResponse, InvokerFilterChain filterChain) {
+    public void doFilter(ServiceRequest serviceRequest, ServiceResponse serviceResponse, ServerInvokerFilterChain filterChain) {
         if (pos == invokerFilters.size()) {
             serviceInvoker.invoke(serviceRequest, serviceResponse, service);
             return;
@@ -63,11 +63,11 @@ public class InvokerFilterChain implements InvokerFilter {
         this.serviceInvoker = serviceInvoker;
     }
 
-    public List<InvokerFilter> getInvokerFilters() {
+    public List<ServerInvokerFilter> getInvokerFilters() {
         return invokerFilters;
     }
 
-    public void setInvokerFilters(List<InvokerFilter> invokerFilters) {
+    public void setInvokerFilters(List<ServerInvokerFilter> invokerFilters) {
         this.invokerFilters = invokerFilters;
     }
 }

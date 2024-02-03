@@ -1,10 +1,9 @@
 package com.wts.tsrpc.client;
 
+import com.wts.tsrpc.client.filter.ClientInvokerFilterChain;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.server.manage.Manager;
-
-import java.util.concurrent.TimeUnit;
 
 public class ClientInvoker {
 
@@ -37,19 +36,25 @@ public class ClientInvoker {
         if (httpClient == null) {
             httpClient = HttpClient.addHttpClient(endpoint, (new HttpClient(endpoint.getHost(), endpoint.getPort(), 10)).manager(manager).init());
         }
-        HttpClient finalHttpClient = httpClient;
+        ClientInvokerFilterChain invokerFilterChain = new ClientInvokerFilterChain();
+        invokerFilterChain.invokerFilters(manager.getDefaultClientInvokerFilters())
+                .manager(manager)
+                .clientService(clientService)
+                .httpClient(httpClient);
         ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
-        String message = manager.getTransform(clientService.getTransformType()).transformRequestToString(request);
-        try {
-            httpClient.connect().await(30, TimeUnit.SECONDS);
-//            httpClient.connect().addListener(_ ->
-//                    finalHttpClient.sendMsg(message)
-//                            .await(30, TimeUnit.SECONDS)).sync();
-            finalHttpClient.sendMsg(message)
-                    .await(30, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        invokerFilterChain.doFilter(request, invokerFilterChain);
+//        ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
+//        String message = manager.getTransform(clientService.getTransformType()).transformRequestToString(request);
+//        try {
+//            httpClient.connect().await(30, TimeUnit.SECONDS);
+////            httpClient.connect().addListener(_ ->
+////                    finalHttpClient.sendMsg(message)
+////                            .await(30, TimeUnit.SECONDS)).sync();
+//            finalHttpClient.sendMsg(message)
+//                    .await(30, TimeUnit.SECONDS);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
         ServiceResponse serviceResponse = HttpClientHandler.getServiceResponse(request.getRequestId());
         try {
             String body = manager.getTransform(clientService.getTransformType()).transformObjectToString(serviceResponse.getBody());

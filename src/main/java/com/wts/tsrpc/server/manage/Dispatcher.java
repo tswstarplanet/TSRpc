@@ -4,8 +4,8 @@ import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.common.Service;
 import com.wts.tsrpc.exception.BizException;
-import com.wts.tsrpc.server.filter.InvokerFilter;
-import com.wts.tsrpc.server.filter.InvokerFilterChain;
+import com.wts.tsrpc.server.filter.ServerInvokerFilter;
+import com.wts.tsrpc.server.filter.ServerInvokerFilterChain;
 import com.wts.tsrpc.server.service.*;
 
 import java.util.List;
@@ -24,13 +24,13 @@ public class Dispatcher {
 
 
     public ServiceResponse dispatch(ServiceRequest request) {
-        List<InvokerFilter> invokerFilters = manager.getDefaultInvokerFilters();
+        List<ServerInvokerFilter> invokerFilters = manager.getDefaultServiceInvokerFilters();
 
         Service service = manager.getService(request.getServiceId());
         if (service == null) {
             throw new BizException("Service of serviceId[" + request.getServiceId() + "] not exist !");
         }
-        InvokerFilterChain filterChain = new InvokerFilterChain();
+        ServerInvokerFilterChain filterChain = new ServerInvokerFilterChain();
         filterChain.setService(service);
         filterChain.setInvokerFilters(invokerFilters);
         ServiceInvoker invoker;

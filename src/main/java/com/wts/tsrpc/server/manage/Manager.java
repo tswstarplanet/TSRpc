@@ -2,15 +2,19 @@ package com.wts.tsrpc.server.manage;
 
 import com.wts.tsrpc.client.ClientInvoker;
 import com.wts.tsrpc.client.ClientService;
-import com.wts.tsrpc.exception.BizException;
-import com.wts.tsrpc.server.filter.InvokerFilter;
+import com.wts.tsrpc.client.filter.ClientInvokerFilter;
 import com.wts.tsrpc.common.Service;
+import com.wts.tsrpc.exception.BizException;
+import com.wts.tsrpc.server.filter.ServerInvokerFilter;
 import com.wts.tsrpc.server.service.Transformer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Manager {
@@ -24,7 +28,9 @@ public class Manager {
 
     private final Map<String, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
-    private final List<InvokerFilter> defaultInvokerFilters = new ArrayList<>();
+    private final List<ServerInvokerFilter> defaultServiceInvokerFilters = new ArrayList<>();
+
+    private final List<ClientInvokerFilter> defaultClientInvokerFilters = new ArrayList<>();
 
     private static final Object serviceLock = new Object();
 
@@ -230,8 +236,13 @@ public class Manager {
         return this;
     }
 
-    public Manager addInvokerFilter(InvokerFilter invokerFilter) {
-        defaultInvokerFilters.add(invokerFilter);
+    public Manager addServiceInvokerFilter(ServerInvokerFilter invokerFilter) {
+        defaultServiceInvokerFilters.add(invokerFilter);
+        return this;
+    }
+
+    public Manager addClientInvokerFilter(ClientInvokerFilter invokerFilter) {
+        defaultClientInvokerFilters.add(invokerFilter);
         return this;
     }
 
@@ -263,11 +274,15 @@ public class Manager {
 //        return dispatcherMap.get(dispatcherType);
 //    }
 
-    public List<InvokerFilter> getDefaultInvokerFilters() {
-        return List.copyOf(defaultInvokerFilters);
+    public List<ServerInvokerFilter> getDefaultServiceInvokerFilters() {
+        return List.copyOf(defaultServiceInvokerFilters);
     }
 
     public String getServiceInvoker() {
         return serviceInvoker;
+    }
+
+    public List<ClientInvokerFilter> getDefaultClientInvokerFilters() {
+        return List.copyOf(defaultClientInvokerFilters);
     }
 }
