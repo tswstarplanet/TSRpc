@@ -8,16 +8,22 @@ import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.Dispatcher;
 import com.wts.tsrpc.server.manage.Manager;
 import com.wts.tsrpc.server.service.JacksonTransformer;
-import com.wts.tsrpc.common.Service;
+import com.wts.tsrpc.server.service.Service;
+import com.wts.tsrpc.server.service.ServiceMethod;
+
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         Manager manager = new Manager();
         Service service = (new Service())
                 .classFullName("com.wts.tsrpc.test.server.ProviderService")
-                .methodName("complexService")
-                .argTypes(new Class[]{Request.class, String.class})
-                .returnType(Response.class);
+                .serviceId("complexService")
+                .method(new ServiceMethod("complexService", new Class<?>[]{Request.class, String.class}))
+                .method(new ServiceMethod("func", new Class<?>[]{List.class}));
+//                .methodName("complexService")
+//                .argTypes(new Class[]{Request.class, String.class})
+//                .returnType(Response.class);
         manager.application(new Application()
                         .name("ServiceProvider")
                         .version("1.0"))
@@ -27,10 +33,10 @@ public class Main {
                 .addServiceObj("complexService", new ProviderService())
                 .addTransformer("jackson", (new JacksonTransformer())
                         .manager(manager))
-                .serviceInvoker("reflect")
+                .serviceInvoker("javassist")
                 .addServiceInvokerFilter(new LogServerInvokerFilter())
-                .addServiceInvokerFilter(new CheckServerInvokerFilter())
-                .addServiceParamType("complexService", service);
+                .addServiceInvokerFilter(new CheckServerInvokerFilter());
+//                .addServiceParamType("complexService", service);
 
 
 

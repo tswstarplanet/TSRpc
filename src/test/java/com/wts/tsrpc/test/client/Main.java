@@ -44,7 +44,7 @@ public class Main {
         ClassTool classTool = new ClassTool();
         classTool.manager(manager);
         IProviderService iProviderService = (IProviderService) classTool
-                .createClientServiceProxy(IProviderService.class, IProviderService.class.getDeclaredMethods(), application, clientService);
+                .getOrCreateClientServiceProxy(IProviderService.class, IProviderService.class.getDeclaredMethods(), application, clientService);
 
         Request<RequestBody<SubRequestBody, SubRequestBody>> request = new Request<>();
         request.setList(new ArrayList<>(Arrays.asList(new Test("a", 1), new Test("b", 2))));
@@ -63,5 +63,22 @@ public class Main {
         Response<ResponseBody<SubResponseBody>> response = iProviderService.complexService(request, "arg1");
 
         System.out.println(JacksonUtils.toJsonString(response));
+    }
+
+
+    public Object callMethod(String methodName, Class<?>[] argTypes, Object[] arguments) {
+        try {
+            com.wts.tsrpc.test.server.ProviderService target = new ProviderService();
+            if (methodName.equals("complexService") && argTypes.length == 2 && argTypes[0].getName().equals("com.wts.tsrpc.test.server.Request") && argTypes[1].getName().equals("java.lang.String")) {
+                return target.complexService((com.wts.tsrpc.test.server.Request) arguments[0], (java.lang.String) arguments[1]);
+            }
+            if (methodName.equals("func") && argTypes.length == 1 && argTypes[0].getName().equals("java.util.List")) {
+                target.func((java.util.List) arguments[0]);
+                return null;
+            }
+            throw new RuntimeException();
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
     }
 }

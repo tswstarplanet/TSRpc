@@ -1,7 +1,7 @@
 package com.wts.tsrpc.server.filter;
 
-import com.wts.tsrpc.common.Service;
-import com.wts.tsrpc.server.service.ServiceInvoker;
+import com.wts.tsrpc.server.service.Service;
+import com.wts.tsrpc.server.proxy.ServiceInvoker;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 

@@ -47,7 +47,7 @@ public class ProviderService {
     }
 
     public void func(List<List<String>> list) {
-
+        System.out.println("invoked func");
     }
 
     public static void main(String[] args) throws NoSuchMethodException, NoSuchFieldException, IOException {

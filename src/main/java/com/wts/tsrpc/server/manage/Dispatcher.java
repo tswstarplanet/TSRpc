@@ -2,11 +2,13 @@ package com.wts.tsrpc.server.manage;
 
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
-import com.wts.tsrpc.common.Service;
+import com.wts.tsrpc.server.proxy.JavassistServiceInvoker;
+import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.exception.BizException;
 import com.wts.tsrpc.server.filter.ServerInvokerFilter;
 import com.wts.tsrpc.server.filter.ServerInvokerFilterChain;
-import com.wts.tsrpc.server.service.*;
+import com.wts.tsrpc.server.proxy.ReflectServiceInvoker;
+import com.wts.tsrpc.server.proxy.ServiceInvoker;
 
 import java.util.List;
 
@@ -36,8 +38,9 @@ public class Dispatcher {
         ServiceInvoker invoker;
 
         switch (manager.getServiceInvoker()) {
-            case "reflect" -> invoker = new ReflectServiceInvoker(service, manager.getObject(request.getServiceId()));
-            default -> invoker = new ReflectServiceInvoker(service, manager.getObject(request.getServiceId()));
+            case "reflect" -> invoker = new ReflectServiceInvoker(service, manager.getServiceObject(request.getServiceId()));
+            case "javassist" -> invoker = new JavassistServiceInvoker(service, manager);
+            default -> invoker = new ReflectServiceInvoker(service, manager.getServiceObject(request.getServiceId()));
         }
         filterChain.setServiceInvoker(invoker);
 

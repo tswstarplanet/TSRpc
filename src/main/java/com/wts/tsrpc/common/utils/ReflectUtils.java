@@ -1,6 +1,7 @@
 package com.wts.tsrpc.common.utils;
 
 import com.wts.tsrpc.server.service.ParameterType;
+import com.wts.tsrpc.server.service.ServiceMethod;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.ParameterizedType;
@@ -38,5 +39,27 @@ public class ReflectUtils {
         } else if (parameterType.isIfHaveGeneric()) {
 
         }
+    }
+
+    public static String getMethodSignature(ServiceMethod serviceMethod) {
+        var builder = new StringBuilder();
+        builder.append(STR."\{serviceMethod.getMethodName()}-");
+        var argTypes = serviceMethod.getArgTypes();
+        for (var argType : argTypes) {
+            builder.append(STR."\{argType.getName()}-");
+        }
+        return builder.toString();
+    }
+
+    public static Class<?>[] getClazzFromName(String[] argTypeNames) {
+        Class<?>[] classes = new Class<?>[argTypeNames.length];
+        for (int i = 0; i < argTypeNames.length; i++) {
+            try {
+                classes[i] = Class.forName(argTypeNames[i]);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return classes;
     }
 }

@@ -8,6 +8,10 @@ public class ServiceRequest {
 
     private String serviceId;
 
+    private String methodName;
+
+    private String[] argTypeNames;
+
     private String[] paramValueStrings;
 
     private Object[] paramValues;
@@ -52,5 +56,21 @@ public class ServiceRequest {
 
     public void setRequestTime(LocalDateTime requestTime) {
         this.requestTime = requestTime;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String[] getArgTypeNames() {
+        return argTypeNames;
+    }
+
+    public void setArgTypeNames(String[] argTypeNames) {
+        this.argTypeNames = argTypeNames;
     }
 }

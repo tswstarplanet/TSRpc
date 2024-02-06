@@ -1,6 +1,6 @@
 package com.wts.tsrpc.common.utils;
 
-import com.wts.tsrpc.common.Service;
+import com.wts.tsrpc.server.service.Service;
 
 import java.util.function.BiFunction;
 

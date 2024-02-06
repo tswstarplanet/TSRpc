@@ -2,7 +2,7 @@ package com.wts.tsrpc.test.server;
 
 import com.wts.tsrpc.server.service.JacksonTransformer;
 import com.wts.tsrpc.server.service.ParameterType;
-import com.wts.tsrpc.common.Service;
+import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.utils.GsonUtils;
 import com.wts.tsrpc.common.utils.ReflectUtils;
@@ -104,10 +104,10 @@ public class RequestBody<S, X> {
         System.out.println(GsonUtils.toJsonString(lists));
 
         Service service = new Service();
-        service.classFullName("com.wts.tsrpc.test.server.RequestBody")
-                .methodName("func")
-                .argTypes(new Class[]{List.class, String.class});
-        service.setParameterTypes(parameterTypes.toArray(new ParameterType[0]));
+        service.classFullName("com.wts.tsrpc.test.server.RequestBody");
+//                .methodName("func")
+//                .argTypes(new Class[]{List.class, String.class});
+//        service.setParameterTypes(parameterTypes.toArray(new ParameterType[0]));
         ServiceRequest serviceRequest = new ServiceRequest();
         serviceRequest.setServiceId("");
 //        serviceRequest.setParamValueStrings(new String[] {"[[{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}},{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}}],[{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}},{\"code\":\"0001\",\"msg\":null,\"list\":null,\"subBody\":{\"subCode\":\"001\",\"subList\":[1,2]},\"subBody2\":{\"subCode\":\"001\",\"subList\":[1,2]}}]]", "arg1"});

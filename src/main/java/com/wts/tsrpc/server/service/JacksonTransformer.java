@@ -4,6 +4,7 @@ import com.wts.tsrpc.client.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.common.utils.JacksonUtils;
+import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.common.utils.SerialNoUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -24,7 +25,7 @@ public class JacksonTransformer extends AbstractTransform {
             request.setParamValues(new Object[request.getParamValueStrings().length]);
         }
         for (int i = 0; i < request.getParamValueStrings().length; i++) {
-            request.getParamValues()[i] = JacksonUtils.parseObject(request.getParamValueStrings()[i], getManager().getParamTypes(request.getServiceId()).get(i));
+            request.getParamValues()[i] = JacksonUtils.parseObject(request.getParamValueStrings()[i], getManager().getParamTypes(request.getServiceId(), ReflectUtils.getMethodSignature(new ServiceMethod(request.getMethodName(), ReflectUtils.getClazzFromName(request.getArgTypeNames())))).get(i));
 //            request.getParamValues()[i] = GsonUtils.parseObject(request.getParamValueStrings()[i], getManager().getService(request.getServiceId()).getArgTypes()[i]);
         }
         return request;
@@ -37,7 +38,8 @@ public class JacksonTransformer extends AbstractTransform {
             response.setReturnValue(null);
             return response;
         }
-        response.setReturnValue(JacksonUtils.parseObject(response.getReturnValueString(), getManager().getServiceReturnValueType(response.getServiceId())));
+        // todo 暂时注掉
+//        response.setReturnValue(JacksonUtils.parseObject(response.getReturnValueString(), getManager().getServiceReturnValueType(response.getServiceId(), ReflectUtils.getMethodSignature())));
         return response;
     }
 
