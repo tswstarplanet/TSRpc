@@ -1,6 +1,6 @@
 package com.wts.tsrpc.client.utils;
 
-import com.wts.tsrpc.client.ClientService;
+import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.utils.SerialNoUtils;
 

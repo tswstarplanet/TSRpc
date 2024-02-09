@@ -1,6 +1,6 @@
 package com.wts.tsrpc.server.service;
 
-import com.wts.tsrpc.client.ClientService;
+import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.server.manage.Manager;
@@ -21,11 +21,6 @@ public class AbstractTransform implements Transformer {
     }
 
     @Override
-    public ServiceRequest transformRequest(ClientService clientService, Object[] arguments) {
-        return null;
-    }
-
-    @Override
     public String transformRequestToString(ServiceRequest request) {
         return null;
     }
@@ -42,6 +37,11 @@ public class AbstractTransform implements Transformer {
 
     @Override
     public Object transformReturnValueObject(String body, Type type) {
+        return null;
+    }
+
+    @Override
+    public ServiceRequest transformRequest(ClientService clientService, Object[] arguments) {
         return null;
     }
 

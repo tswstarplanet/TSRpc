@@ -1,9 +1,13 @@
 package com.wts.tsrpc.client;
 
 import com.wts.tsrpc.client.filter.ClientInvokerFilterChain;
+import com.wts.tsrpc.client.service.ClientMethod;
+import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.server.manage.Manager;
+
+import java.util.Arrays;
 
 public class ClientInvoker {
 
@@ -28,7 +32,8 @@ public class ClientInvoker {
         return this;
     }
 
-    public Object invoke(Object[] arguments) {
+    public Object invoke(Object[] arguments, ClientMethod method) {
+        method.settleGenericParamTypes();
         String applicationId = clientService.getApplicationId();
         String serviceId = clientService.getServiceId();
         Endpoint endpoint = loadBalancer.balance(new BalanceAggregate(applicationId, serviceId));
@@ -42,6 +47,10 @@ public class ClientInvoker {
                 .clientService(clientService)
                 .httpClient(httpClient);
         ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
+        request.setMethodName(method.getClientMethodName());
+        request.setArgTypeNames(Arrays.stream(method.getArgTypes()).map(Class::getName).toList().toArray(new String[0]));
+//        request.setArgTypeNames((String[]) Arrays.stream(method.getArgTypes()).map(Class::getName).toArray());
+        request.setApplicationId(clientService.getApplicationId());
         invokerFilterChain.doFilter(request, invokerFilterChain);
 //        ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
 //        String message = manager.getTransform(clientService.getTransformType()).transformRequestToString(request);
@@ -58,7 +67,7 @@ public class ClientInvoker {
         ServiceResponse serviceResponse = HttpClientHandler.getServiceResponse(request.getRequestId());
         try {
             String body = manager.getTransform(clientService.getTransformType()).transformObjectToString(serviceResponse.getBody());
-            return manager.getTransform(clientService.getTransformType()).transformReturnValueObject(body, clientService.getReturnGenericType());
+            return manager.getTransform(clientService.getTransformType()).transformReturnValueObject(body, method.getReturnGenericType());
         } finally {
             HttpClientHandler.removeServiceResponse(request.getRequestId());
         }

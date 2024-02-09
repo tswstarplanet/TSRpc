@@ -1,7 +1,8 @@
 package com.wts.tsrpc.test.client;
 
 import com.wts.tsrpc.client.ClientInvoker;
-import com.wts.tsrpc.client.ClientService;
+import com.wts.tsrpc.client.service.ClientMethod;
+import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.client.RandomLoadBalancer;
 import com.wts.tsrpc.client.filter.CheckClientInvokerFilter;
 import com.wts.tsrpc.client.filter.LogClientInvokerFilter;
@@ -14,6 +15,7 @@ import com.wts.tsrpc.test.server.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws NoSuchMethodException {
@@ -25,11 +27,19 @@ public class Main {
                 .name("ServerApplication1")
                 .version("1.0");
         clientService.setServiceId("complexService");
+        clientService.setApplicationId("ServerApplication1");
+        clientService.setClientClassFullName("com.wts.tsrpc.test.client.IProviderService");
         clientService.setApplicationId(application.getName());
         clientService.setApplicationVersion(application.getVersion());
-        clientService.setArgTypes(new Class[]{Request.class, String.class});
-        clientService.setClientClassFullName("com.wts.tsrpc.test.client.IProviderService");
-        clientService.setClientMethodName("complexService");
+
+        clientService.setClientMethods(new ArrayList<>(Arrays.asList(
+                (new ClientMethod()).clientMethodName("complexService")
+                        .argTypes(new Class<?>[]{ Request.class, String.class} )
+                        , (new ClientMethod().clientMethodName("func").argTypes(new Class<?>[]{ List.class })))));
+
+//        clientService.setArgTypes(new Class[]{Request.class, String.class});
+//        clientService.setClientClassFullName("com.wts.tsrpc.test.client.IProviderService");
+//        clientService.setClientMethodName("complexService");
         clientService.setTransformType("jackson");
         manager.addClientService("ServerApplication1", "providerService", clientService)
                 .addTransformer("jackson", new JacksonTransformer());
@@ -81,4 +91,29 @@ public class Main {
             throw new RuntimeException(t);
         }
     }
+
+//    {
+//        java.lang.Object[] args = new java.lang.Object[]{$1, $2};
+//        com.wts.tsrpc.client.service.ClientMethod clientMethod = new com.wts.tsrpc.client.service.ClientMethod();
+//        clientMethod.clientMethodName("complexService");
+//        try {
+//            clientMethod.argTypes(new java.lang.String[]{"com.wts.tsrpc.test.server.Request", "java.lang.String"});
+//        } catch (Exception e) {
+//            throw new com.wts.tsrpc.exception.BizException("Class not found excpetion");
+//        }
+//        return (com.wts.tsrpc.test.server.Response) $0.clientInvoker.invoke(args, clientMethod);
+//    }
+
+//    {
+//        java.lang.Object[] args = new java.lang.Object[]{$1};
+//        com.wts.tsrpc.client.service.ClientMethod clientMethod = new com.wts.tsrpc.client.service.ClientMethod();
+//        clientMethod.clientMethodName("func");
+//        try {
+//            clientMethod.argTypes(new java.lang.String[]{"java.util.List"});
+//        } catch (Exception e) {
+//            throw new com.wts.tsrpc.exception.BizException("Class not found excpetion");
+//        }
+//        return (java.lang.String) $0.clientInvoker.invoke(args, clientMethod);
+//    }
+
 }

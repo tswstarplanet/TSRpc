@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 public class ServiceRequest {
 
+    private String applicationId;
+
     private String requestId;
 
     private String serviceId;
@@ -17,6 +19,14 @@ public class ServiceRequest {
     private Object[] paramValues;
 
     private LocalDateTime requestTime;
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
 
     public String getRequestId() {
         return requestId;

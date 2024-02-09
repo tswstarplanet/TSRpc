@@ -1,15 +1,12 @@
 package com.wts.tsrpc.common.utils;
 
 import com.wts.tsrpc.server.service.ParameterType;
-import com.wts.tsrpc.server.service.ServiceMethod;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ReflectUtils {
     public static boolean isCollection(Class<?> clazz) {
@@ -41,12 +38,15 @@ public class ReflectUtils {
         }
     }
 
-    public static String getMethodSignature(ServiceMethod serviceMethod) {
+    public static String getMethodSignature(String methodName, Class<?>[] argTypes) {
+        return getMethodSignature(methodName, Arrays.stream(argTypes).map(Class::getName).toList());
+    }
+
+    public static String getMethodSignature(String methodName, List<String> argTypeNames) {
         var builder = new StringBuilder();
-        builder.append(STR."\{serviceMethod.getMethodName()}-");
-        var argTypes = serviceMethod.getArgTypes();
-        for (var argType : argTypes) {
-            builder.append(STR."\{argType.getName()}-");
+        builder.append(STR."\{methodName}-");
+        for (var argTypeName : argTypeNames) {
+            builder.append(STR."\{argTypeName}-");
         }
         return builder.toString();
     }
@@ -62,4 +62,33 @@ public class ReflectUtils {
         }
         return classes;
     }
+
+    public static String getArgsString(Class<?>[] classes) {
+//        if (ArrayUtils.isEmpty(classes)) {
+//            return "";
+//        }
+//        StringBuilder builder = new StringBuilder("new java.lang.Class<?>[]{");
+//        for (int i = 0; i < classes.length; i++) {
+//            builder.append(STR."java.lang.Class.forName(\"\{classes[i].getName()}\")");
+//            if (i < classes.length - 1) {
+//                builder.append(", ");
+//            }
+//        }
+//        builder.append("}");
+//        return builder.toString();
+        if (ArrayUtils.isEmpty(classes)) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder("new java.lang.String[]{");
+        for (int i = 0; i < classes.length; i++) {
+            builder.append(STR."\"\{classes[i].getName()}\"");
+            if (i < classes.length - 1) {
+                builder.append(", ");
+            }
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
+
 }

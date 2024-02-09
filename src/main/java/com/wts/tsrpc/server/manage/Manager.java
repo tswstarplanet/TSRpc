@@ -1,7 +1,8 @@
 package com.wts.tsrpc.server.manage;
 
 import com.wts.tsrpc.client.ClientInvoker;
-import com.wts.tsrpc.client.ClientService;
+import com.wts.tsrpc.client.service.ClientMethod;
+import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.client.filter.ClientInvokerFilter;
 import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.exception.BizException;
@@ -46,9 +47,12 @@ public class Manager {
 
 //    private final Map<String, List<Type>> serviceParamTypeMap = new ConcurrentHashMap<>();
 
-    private final Map<String, Map<String, List<Type>>> serviceParamTypeMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, List<Type>>> serviceMethodParamTypeMap = new ConcurrentHashMap<>();
 
-    private final Map<String, Map<String, Type>> serviceReturnValueTypeMap = new ConcurrentHashMap<>();
+    /**
+     * Generic type map of methods of service on client side.
+     */
+    private final Map<String, Map<String, List<Type>>> clientMethodParamTypeMap = new ConcurrentHashMap<>();
 
     private final Map<String, Map<String, Type>> clientServiceReturnValueTypeMap = new ConcurrentHashMap<>();
 
@@ -131,16 +135,29 @@ public class Manager {
             throw new BizException(STR."Client Service of serviceId [\{serviceId}] has been existed !");
         }
         try {
-            Method method = Class.forName(clientService.getClientClassFullName())
-                    .getMethod(clientService.getClientMethodName(), clientService.getArgTypes());
-            clientService.setParamTypes(new ArrayList<>(Arrays.asList(method.getGenericParameterTypes())));
-            clientService.setReturnGenericType(method.getGenericReturnType());
+            for (ClientMethod clientMethod : clientService.getClientMethods()) {
+                Method method;
+                try {
+                    method = Class.forName(clientService.getClientClassFullName())
+                            .getMethod(clientMethod.getClientMethodName(), clientMethod.getArgTypes());
+                } catch (NoSuchMethodException e) {
+                    throw new BizException(STR."Method of methodName: \{clientMethod.getClientMethodName()} and args: \{(new ArrayList<>(Arrays.asList(clientMethod.getArgTypes()))).toString()} not found !");
+
+                }
+                clientMethod.setParamTypes(Arrays.stream(method.getGenericParameterTypes()).toList())
+                        .returnGenericType(method.getGenericReturnType());
+                clientMethod.returnType(method.getReturnType());
+            }
+            clientService.settleClientMethod();
+            tempServiceMap.put(serviceId, clientService);
             return this;
         } catch (ClassNotFoundException e) {
             throw new BizException(STR."Class of \{clientService.getClientClassFullName()} not found !");
-        } catch (NoSuchMethodException e) {
-            throw new BizException(STR."Method of methodName: \{clientService.getClientMethodName()} and args: \{(new ArrayList<>(Arrays.asList(clientService.getArgTypes()))).toString()} not found !");
         }
+    }
+
+    public ClientService getClientService(String applicationId, String serviceId) {
+        return clientServiceMap.get(applicationId).get(serviceId);
     }
 
 //    public Manager addServiceReturnValueType(String serviceId, Service service) {
@@ -165,12 +182,16 @@ public class Manager {
 //        }
 //    }
 
-    public Type getServiceReturnValueType(String serviceId, String methodSignature) {
-        return serviceReturnValueTypeMap.get(serviceId).get(methodSignature);
+    public Type getClientServiceReturnValueType(String serviceId, String methodSignature) {
+        return clientServiceReturnValueTypeMap.get(serviceId).get(methodSignature);
     }
 
-    public List<Type> getParamTypes(String serviceId, String methodSignature) {
-        return List.of(serviceParamTypeMap.get(serviceId).get(methodSignature).toArray(new Type[0]));
+    public List<Type> getServiceMethodParamTypes(String serviceId, String methodSignature) {
+        return List.of(serviceMethodParamTypeMap.get(serviceId).get(methodSignature).toArray(new Type[0]));
+    }
+
+    public List<Type> getClientMethodParamTypes(String serviceId, String methodSignature) {
+        return List.of(clientMethodParamTypeMap.get(serviceId).get(methodSignature).toArray(new Type[0]));
     }
 
     public Manager addService(String serviceId, Service service) {
@@ -186,13 +207,13 @@ public class Manager {
             }
             try {
                 Class<?> clazz = Class.forName(service.getClassFullName());
-                serviceParamTypeMap.putIfAbsent(serviceId, new ConcurrentHashMap<>());
+                serviceMethodParamTypeMap.putIfAbsent(serviceId, new ConcurrentHashMap<>());
                 for (ServiceMethod serviceMethod : service.getMethods()) {
                     Method method = clazz.getMethod(serviceMethod.getMethodName(), serviceMethod.getArgTypes());
                     serviceMethod.setParameterTypes(method.getGenericParameterTypes());
                     serviceMethod.setReturnType(method.getReturnType());
 
-                    serviceParamTypeMap.get(serviceId).put(ReflectUtils.getMethodSignature(serviceMethod), new ArrayList<>(Arrays.asList(serviceMethod.getParameterTypes())));
+                    serviceMethodParamTypeMap.get(serviceId).put(ReflectUtils.getMethodSignature(serviceMethod.getMethodName(), serviceMethod.getArgTypes()), new ArrayList<>(Arrays.asList(serviceMethod.getParameterTypes())));
                 }
                 serviceMap.put(serviceId, service);
 

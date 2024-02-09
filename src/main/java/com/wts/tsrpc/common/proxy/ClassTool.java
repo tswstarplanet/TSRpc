@@ -1,7 +1,9 @@
 package com.wts.tsrpc.common.proxy;
 
 import com.wts.tsrpc.client.ClientInvoker;
-import com.wts.tsrpc.client.ClientService;
+import com.wts.tsrpc.client.service.ClientMethod;
+import com.wts.tsrpc.client.service.ClientService;
+import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.exception.BizException;
 import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.Manager;
@@ -37,7 +39,7 @@ public class ClassTool {
         return this;
     }
 
-    public ServiceWrapper getOrCreateProxyObject(Service service) {
+    public ServiceWrapper getOrCreateServerProxyObject(Service service) {
         if (proxyObjectMap.get(service.getServiceId()) == null) {
             synchronized (proxyObjectLock) {
                 if (proxyObjectMap.get(service.getServiceId()) == null) {
@@ -172,25 +174,28 @@ public class ClassTool {
             cons.setBody("{ $0.clientInvoker = $1; }");
             cc.addConstructor(cons);
 
-            for (Method method : methods) {
-                String methodName = method.getName();
-                Class<?>[] argTypes = method.getParameterTypes();
-                Class<?> returnType = method.getReturnType();
+            for (ClientMethod clientMethod : clientService.getClientMethods()) {
+                String methodName = clientMethod.getClientMethodName();
+                Class<?>[] argTypes = clientMethod.getArgTypes();
+                Class<?> returnType = clientMethod.getReturnType();
                 CtClass[] ctClasses = new CtClass[argTypes.length];
                 for (int i = 0; i < argTypes.length; i++) {
                     ctClasses[i] = classPool.get(argTypes[i].getName());
                 }
                 CtMethod ctMethod = new CtMethod(classPool.get(returnType.getName()), methodName, ctClasses, cc);
                 ctMethod.setModifiers(Modifier.PUBLIC);
-                String arguments = "Object[] args = new Object[]{";
+                String methodBody = "java.lang.Object[] args = new java.lang.Object[]{";
                 for (int i = 0; i < argTypes.length; i++) {
-                    arguments = STR."\{arguments}$\{i + 1}";
+                    methodBody = STR."\{methodBody}$\{i + 1}";
                     if (i < argTypes.length - 1) {
-                        arguments = STR."\{arguments}, ";
+                        methodBody = STR."\{methodBody}, ";
                     }
                 }
-                arguments = STR."\{arguments}};";
-                String methodBody = STR."{ \{arguments} return (\{returnType.getName()})$0.clientInvoker.invoke(args); }";
+                methodBody = STR."\{methodBody}};";
+                methodBody = STR."\{methodBody} com.wts.tsrpc.client.service.ClientMethod clientMethod = new com.wts.tsrpc.client.service.ClientMethod(); clientMethod.clientMethodName(\"\{methodName}\"); clientMethod.clientClassFullName(\"\{clientService.getClientClassFullName()}\");";
+//                methodBody = STR."\{methodBody} try { clientMethod.argTypes(\{ReflectUtils.getArgsString(argTypes)}); } catch(Exception e) { throw new com.wts.tsrpc.exception.BizException(\"Class not found excpetion\"); }";
+                methodBody = STR."\{methodBody} try { clientMethod.argTypes(\{ReflectUtils.getArgsString(argTypes)}); } catch(java.lang.Exception e) { throw new java.lang.RuntimeException(e); }";
+                methodBody = STR."{ \{methodBody} return (\{returnType.getName()})$0.clientInvoker.invoke(args, clientMethod); }";
                 ctMethod.setBody(methodBody);
                 cc.addMethod(ctMethod);
             }
@@ -198,6 +203,7 @@ public class ClassTool {
             Class<?> clazz = cc.toClass();
             return clazz.getConstructor(ClientInvoker.class).newInstance(manager.getClientInvoker(application.getKey(), clientService.getServiceId()));
         } catch (CannotCompileException e) {
+            logger.error("error: ", e);
             throw new BizException(STR."The class [\{clientServiceClazz.getName()} can not be compiled !");
         } catch (NotFoundException e) {
             throw new BizException(STR."The class [\{clientServiceClazz.getName()} can not be found !");

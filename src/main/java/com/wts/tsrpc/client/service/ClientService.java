@@ -1,9 +1,13 @@
-package com.wts.tsrpc.client;
+package com.wts.tsrpc.client.service;
 
-import com.wts.tsrpc.server.service.ParameterType;
+import com.wts.tsrpc.common.utils.CollectionUtils;
+import com.wts.tsrpc.common.utils.ReflectUtils;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ClientService {
 
@@ -17,19 +21,25 @@ public class ClientService {
 
     private String serviceId;
 
-    private List<Type> paramTypes;
-
     private String clientClassFullName;
 
-    private String clientMethodName;
+    private List<ClientMethod> clientMethods = new ArrayList<>();
 
-    private Class<?>[] argTypes;
+    private Map<String, ClientMethod> clientMethodMap = new HashMap<>();
 
-    private ParameterType[] parameterTypes;
+    public ClientService settleClientMethod() {
+        if (CollectionUtils.isEmpty(clientMethods)) {
+            return this;
+        }
+        for (ClientMethod method : clientMethods) {
+            clientMethodMap.put(ReflectUtils.getMethodSignature(method.getClientMethodName(), method.getArgTypes()), method);
+        }
+        return this;
+    }
 
-    private Class<?> returnType;
-
-    private Type returnGenericType;
+    public Type getMethodReturnGenericType(String signature) {
+        return clientMethodMap.get(signature).getReturnGenericType();
+    }
 
     public String getTransformType() {
         return transformType;
@@ -71,14 +81,6 @@ public class ClientService {
         this.serviceId = serviceId;
     }
 
-    public List<Type> getParamTypes() {
-        return paramTypes;
-    }
-
-    public void setParamTypes(List<Type> paramTypes) {
-        this.paramTypes = paramTypes;
-    }
-
     public String getClientClassFullName() {
         return clientClassFullName;
     }
@@ -87,43 +89,19 @@ public class ClientService {
         this.clientClassFullName = clientClassFullName;
     }
 
-    public String getClientMethodName() {
-        return clientMethodName;
+    public List<ClientMethod> getClientMethods() {
+        return clientMethods;
     }
 
-    public void setClientMethodName(String clientMethodName) {
-        this.clientMethodName = clientMethodName;
+    public void setClientMethods(List<ClientMethod> clientMethods) {
+        this.clientMethods = clientMethods;
     }
 
-    public Class<?>[] getArgTypes() {
-        return argTypes;
+    public Map<String, ClientMethod> getClientMethodMap() {
+        return clientMethodMap;
     }
 
-    public void setArgTypes(Class<?>[] argTypes) {
-        this.argTypes = argTypes;
-    }
-
-    public ParameterType[] getParameterTypes() {
-        return parameterTypes;
-    }
-
-    public void setParameterTypes(ParameterType[] parameterTypes) {
-        this.parameterTypes = parameterTypes;
-    }
-
-    public Class<?> getReturnType() {
-        return returnType;
-    }
-
-    public void setReturnType(Class<?> returnType) {
-        this.returnType = returnType;
-    }
-
-    public Type getReturnGenericType() {
-        return returnGenericType;
-    }
-
-    public void setReturnGenericType(Type returnGenericType) {
-        this.returnGenericType = returnGenericType;
+    public void setClientMethodMap(Map<String, ClientMethod> clientMethodMap) {
+        this.clientMethodMap = clientMethodMap;
     }
 }

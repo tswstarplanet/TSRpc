@@ -1,6 +1,6 @@
 package com.wts.tsrpc.server.service;
 
-import com.wts.tsrpc.client.ClientService;
+import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.common.utils.JacksonUtils;
@@ -25,8 +25,8 @@ public class JacksonTransformer extends AbstractTransform {
             request.setParamValues(new Object[request.getParamValueStrings().length]);
         }
         for (int i = 0; i < request.getParamValueStrings().length; i++) {
-            request.getParamValues()[i] = JacksonUtils.parseObject(request.getParamValueStrings()[i], getManager().getParamTypes(request.getServiceId(), ReflectUtils.getMethodSignature(new ServiceMethod(request.getMethodName(), ReflectUtils.getClazzFromName(request.getArgTypeNames())))).get(i));
-//            request.getParamValues()[i] = GsonUtils.parseObject(request.getParamValueStrings()[i], getManager().getService(request.getServiceId()).getArgTypes()[i]);
+            ServiceMethod method = new ServiceMethod(request.getMethodName(), ReflectUtils.getClazzFromName(request.getArgTypeNames()));
+            request.getParamValues()[i] = JacksonUtils.parseObject(request.getParamValueStrings()[i], getManager().getServiceMethodParamTypes(request.getServiceId(), ReflectUtils.getMethodSignature(method.getMethodName(), method.getArgTypes())).get(i));
         }
         return request;
     }
@@ -38,8 +38,7 @@ public class JacksonTransformer extends AbstractTransform {
             response.setReturnValue(null);
             return response;
         }
-        // todo 暂时注掉
-//        response.setReturnValue(JacksonUtils.parseObject(response.getReturnValueString(), getManager().getServiceReturnValueType(response.getServiceId(), ReflectUtils.getMethodSignature())));
+        response.setReturnValue(JacksonUtils.parseObject(response.getReturnValueString(), getManager().getClientService(response.getApplicationId(), response.getServiceId()).getMethodReturnGenericType(ReflectUtils.getMethodSignature(response.getMethodName(), response.getMethodParamTypeNames()))));
         return response;
     }
 

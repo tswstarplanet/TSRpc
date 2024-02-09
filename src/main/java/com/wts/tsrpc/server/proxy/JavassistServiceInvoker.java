@@ -24,7 +24,7 @@ public class JavassistServiceInvoker implements ServiceInvoker {
         this.manager = manager;
         ClassTool classTool = new ClassTool();
         classTool.manager(manager);
-        this.wrapper = classTool.getOrCreateProxyObject(service);
+        this.wrapper = classTool.getOrCreateServerProxyObject(service);
     }
 
 

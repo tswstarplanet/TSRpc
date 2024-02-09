@@ -1,6 +1,10 @@
 package com.wts.tsrpc.common;
 
+import java.util.List;
+
 public class ServiceResponse {
+
+    private String applicationId;
 
     private String requestId;
 
@@ -16,6 +20,10 @@ public class ServiceResponse {
 
     private Object returnValue;
 
+    private List<String> methodParamTypeNames;
+
+    private String methodName;
+
     public ServiceResponse() {
     }
 
@@ -23,6 +31,14 @@ public class ServiceResponse {
         this.code = code;
         this.msg = msg;
         this.body = body;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
     }
 
     public String getCode() {
@@ -79,5 +95,21 @@ public class ServiceResponse {
 
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
+    }
+
+    public List<String> getMethodParamTypeNames() {
+        return methodParamTypeNames;
+    }
+
+    public void setMethodParamTypeNames(List<String> methodParamTypeNames) {
+        this.methodParamTypeNames = methodParamTypeNames;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
     }
 }
