@@ -29,7 +29,7 @@ public class Main {
         clientService.setServiceId("complexService");
         clientService.setApplicationId("ServerApplication1");
         clientService.setClientClassFullName("com.wts.tsrpc.test.client.IProviderService");
-        clientService.setApplicationId(application.getName());
+        clientService.setApplicationId(application.getApplicationId());
         clientService.setApplicationVersion(application.getVersion());
 
         clientService.setClientMethods(new ArrayList<>(Arrays.asList(

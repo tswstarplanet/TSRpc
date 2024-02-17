@@ -1,5 +1,6 @@
 package com.wts.tsrpc.common.registry;
 
+import com.wts.tsrpc.client.Endpoint;
 import com.wts.tsrpc.server.manage.Application;
 
 /**
@@ -7,7 +8,9 @@ import com.wts.tsrpc.server.manage.Application;
  */
 public interface Registry {
 
-    void register(Application application, RegisterConfig config);
+    default void register(Application application, Endpoint endpoint) {}
 
-    void deregister(Application application, RegisterConfig config);
+    default void deregister(Application application, Endpoint endpoint) {}
+
+    default void subscribe(Application application) {}
 }

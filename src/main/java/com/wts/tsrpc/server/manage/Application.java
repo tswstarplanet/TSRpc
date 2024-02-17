@@ -1,7 +1,7 @@
 package com.wts.tsrpc.server.manage;
 
 public class Application {
-    private String name;
+    private String applicationId;
 
     private String version;
 
@@ -16,7 +16,7 @@ public class Application {
     }
 
     public Application name(String name) {
-        this.name = name;
+        this.applicationId = name;
         return this;
     }
 
@@ -25,8 +25,8 @@ public class Application {
         return this;
     }
 
-    public String getName() {
-        return name;
+    public String getApplicationId() {
+        return applicationId;
     }
 
     public String getVersion() {
@@ -34,6 +34,6 @@ public class Application {
     }
 
     public String getKey() {
-        return STR."\{name}:\{version}";
+        return STR."\{applicationId}:\{version}";
     }
 }
