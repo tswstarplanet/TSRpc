@@ -1,12 +1,15 @@
 package com.wts.tsrpc.test.client;
 
 import com.wts.tsrpc.client.ClientInvoker;
+import com.wts.tsrpc.client.loadbalance.LoadBalancer;
 import com.wts.tsrpc.client.service.ClientMethod;
 import com.wts.tsrpc.client.service.ClientService;
-import com.wts.tsrpc.client.RandomLoadBalancer;
+import com.wts.tsrpc.client.loadbalance.RandomLoadBalancer;
 import com.wts.tsrpc.client.filter.CheckClientInvokerFilter;
 import com.wts.tsrpc.client.filter.LogClientInvokerFilter;
 import com.wts.tsrpc.common.proxy.ClassTool;
+import com.wts.tsrpc.common.registry.NacosRegistry;
+import com.wts.tsrpc.common.registry.Registry;
 import com.wts.tsrpc.common.utils.JacksonUtils;
 import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.Manager;
@@ -24,7 +27,7 @@ public class Main {
 //                .manager(manager);
         ClientService clientService = new ClientService();
         Application application = (new Application())
-                .name("ServerApplication1")
+                .applicationId("ServiceProvider")
                 .version("1.0");
         clientService.setServiceId("complexService");
         clientService.setApplicationId("ServerApplication1");
@@ -44,9 +47,14 @@ public class Main {
         manager.addClientService("ServerApplication1", "providerService", clientService)
                 .addTransformer("jackson", new JacksonTransformer());
         ClientInvoker clientInvoker = new ClientInvoker();
+        Registry registry = new NacosRegistry("127.0.0.1:8848", "test_namespace");
+
+        registry.subscribe(application);
+
+        LoadBalancer loadBalancer = new RandomLoadBalancer(registry);
         clientInvoker.clientService(clientService)
                 .manager(manager)
-                .loadBalancer(new RandomLoadBalancer());
+                .loadBalancer(loadBalancer);
         manager.addClientInvoker(application.getKey(), clientService.getServiceId(), clientInvoker);
         manager.addClientInvokerFilter(new LogClientInvokerFilter())
                 .addClientInvokerFilter(new CheckClientInvokerFilter());

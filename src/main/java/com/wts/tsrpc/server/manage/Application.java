@@ -11,11 +11,16 @@ public class Application {
 
     }
 
+    public Application(String applicationId, String version) {
+        this.applicationId = applicationId;
+        this.version = version;
+    }
+
     public static Application getApplication() {
         return application;
     }
 
-    public Application name(String name) {
+    public Application applicationId(String name) {
         this.applicationId = name;
         return this;
     }

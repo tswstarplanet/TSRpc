@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractRegistry {
+public abstract class AbstractRegistry implements Registry {
     private String serverList;
 
     private String namespace;
@@ -15,6 +15,11 @@ public abstract class AbstractRegistry {
         this.serverList = serverList;
         this.namespace = namespace;
         instanceMap = new ConcurrentHashMap<>();
+    }
+
+    @Override
+    public List<ApplicationInstance> availableApplicationInstances(String applicationKey) {
+        return instanceMap.get(applicationKey);
     }
 
     public String getServerList() {

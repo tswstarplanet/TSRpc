@@ -6,16 +6,16 @@ public class ApplicationInstance {
 
     private String version;
 
-    private String ip;
+    private String host;
 
     private Integer port;
 
     private String applicationKey;
 
-    public ApplicationInstance(String applicationId, String version, String ip, Integer port) {
+    public ApplicationInstance(String applicationId, String version, String host, Integer port) {
         this.applicationId = applicationId;
         this.version = version;
-        this.ip = ip;
+        this.host = host;
         this.port = port;
         this.applicationKey = STR."\{applicationId}:\{version}";
     }
@@ -36,12 +36,12 @@ public class ApplicationInstance {
         this.version = version;
     }
 
-    public String getIp() {
-        return ip;
+    public String getHost() {
+        return host;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setHost(String host) {
+        this.host = host;
     }
 
     public Integer getPort() {

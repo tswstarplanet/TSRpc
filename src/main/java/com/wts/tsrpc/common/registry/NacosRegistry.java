@@ -56,7 +56,7 @@ public class NacosRegistry extends AbstractRegistry implements Registry {
                         super.getInstanceMap().get(((NamingEvent) event).getServiceName()).clear();
                     } else {
                         List<ApplicationInstance> applicationInstances = ((NamingEvent) event).getInstances().stream().map(instance -> {
-                            String[] keyArray = instance.getServiceName().split(",");
+                            String[] keyArray = instance.getServiceName().split(":");
                             return new ApplicationInstance(keyArray[0], keyArray[1], instance.getIp(), instance.getPort());
                         }).toList();
                         super.getInstanceMap().put(((NamingEvent) event).getServiceName(), applicationInstances);

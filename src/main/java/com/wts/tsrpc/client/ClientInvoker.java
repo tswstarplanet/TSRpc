@@ -1,10 +1,12 @@
 package com.wts.tsrpc.client;
 
 import com.wts.tsrpc.client.filter.ClientInvokerFilterChain;
+import com.wts.tsrpc.client.loadbalance.LoadBalancer;
 import com.wts.tsrpc.client.service.ClientMethod;
 import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
+import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.Manager;
 
 import java.util.Arrays;
@@ -35,11 +37,10 @@ public class ClientInvoker {
     public Object invoke(Object[] arguments, ClientMethod method) {
         method.settleGenericParamTypes();
         String applicationId = clientService.getApplicationId();
-        String serviceId = clientService.getServiceId();
-        Endpoint endpoint = loadBalancer.balance(new BalanceAggregate(applicationId, serviceId));
-        HttpClient httpClient = HttpClient.getHttpClient(endpoint);
+        var applicationInstance = loadBalancer.balance(new Application(applicationId, clientService.getApplicationVersion()));
+        HttpClient httpClient = HttpClient.getHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()));
         if (httpClient == null) {
-            httpClient = HttpClient.addHttpClient(endpoint, (new HttpClient(endpoint.getHost(), endpoint.getPort(), 10)).manager(manager).init());
+            httpClient = HttpClient.addHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()), (new HttpClient(applicationInstance.getHost(), applicationInstance.getPort(), 10)).manager(manager).init());
         }
         ClientInvokerFilterChain invokerFilterChain = new ClientInvokerFilterChain();
         invokerFilterChain.invokerFilters(manager.getDefaultClientInvokerFilters())

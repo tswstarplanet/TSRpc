@@ -1,5 +1,8 @@
 package com.wts.tsrpc.test.server;
 
+import com.wts.tsrpc.client.Endpoint;
+import com.wts.tsrpc.common.registry.NacosRegistry;
+import com.wts.tsrpc.common.registry.Registry;
 import com.wts.tsrpc.server.HttpServer;
 import com.wts.tsrpc.server.HttpServerInitializer;
 import com.wts.tsrpc.server.filter.CheckServerInvokerFilter;
@@ -24,9 +27,11 @@ public class Main {
 //                .methodName("complexService")
 //                .argTypes(new Class[]{Request.class, String.class})
 //                .returnType(Response.class);
-        manager.application(new Application()
-                        .name("ServiceProvider")
-                        .version("1.0"))
+        Application application = new Application()
+                .applicationId("ServiceProvider")
+                .version("1.0");
+
+        manager.application(application)
                 .addService("complexService", service)
                 .dispatcher(new Dispatcher()
                         .manager(manager))
@@ -38,7 +43,8 @@ public class Main {
                 .addServiceInvokerFilter(new CheckServerInvokerFilter());
 //                .addServiceParamType("complexService", service);
 
-
+        Registry registry = new NacosRegistry("127.0.0.1:8848", "test_namespace");
+        registry.register(application, new Endpoint("127.0.0.1", 8866));
 
         HttpServer httpServer = (new HttpServer())
                 .port(8866)
