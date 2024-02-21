@@ -80,7 +80,7 @@ public class Main {
 
         Response<ResponseBody<SubResponseBody>> response = iProviderService.complexService(request, "arg1");
 
-        System.out.println(JacksonUtils.toJsonString(response));
+        System.out.println("Rpc result: " + JacksonUtils.toJsonString(response));
     }
 
 
