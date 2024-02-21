@@ -2,8 +2,6 @@ package com.wts.tsrpc.common.utils;
 
 import com.wts.tsrpc.server.service.ParameterType;
 import org.apache.commons.lang3.ArrayUtils;
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -17,7 +15,7 @@ public class ReflectUtils {
         return clazz.isAssignableFrom(Map.class);
     }
 
-    public static void settleParameterType(@NotNull ParameterType parameterType, Type type) {
+    public static void settleParameterType(ParameterType parameterType, Type type) {
         parameterType.setRawType((Class<?>) (type instanceof ParameterizedType ? ((ParameterizedType) type).getRawType() : type));
         parameterType.setIfHaveGeneric(type instanceof ParameterizedType);
         parameterType.setIfCollection(ReflectUtils.isCollection(type instanceof Class<?> ? (Class<?>) type : ((Class<?>) ((ParameterizedType) type).getRawType())));
