@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.wts.tsrpc.common.config;
+package com.wts.tsrpc.exception;
 
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-
-@Target(ElementType.TYPE)
-public @interface TSService {
+public class ConfigMistakeException extends RuntimeException {
+    public ConfigMistakeException(String message) {
+        super(message);
+    }
 }

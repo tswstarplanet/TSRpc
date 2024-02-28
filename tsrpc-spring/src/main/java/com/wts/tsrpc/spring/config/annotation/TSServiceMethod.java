@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-package com.wts.tsrpc.common.config;
+package com.wts.tsrpc.spring.config.annotation;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
 public @interface TSServiceMethod {
 }
