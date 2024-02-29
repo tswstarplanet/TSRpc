@@ -84,6 +84,10 @@ public class ServiceAnnotationPostProcessor implements BeanDefinitionRegistryPos
         serviceAnnotationTypes.forEach(serviceAnnotationType -> {
             scanner.addIncludeFilter(new AnnotationTypeFilter(serviceAnnotationType));
         });
+        packagesToScan.forEach(packageToScan -> {
+            scanner.scan(packageToScan);
+
+        });
     }
 
     @Override
