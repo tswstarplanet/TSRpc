@@ -36,14 +36,14 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.regis
  * @see #registerDefaultFilters()
  * @since 2.5.7
  */
-public class TsRpcClassPathBeanDefinitionScanner extends ClassPathBeanDefinitionScanner {
+public class TsRpcBeanDefinitionScanner extends ClassPathBeanDefinitionScanner {
 
     /**
      * key is package to scan, value is BeanDefinition
      */
     private final ConcurrentMap<String, Set<BeanDefinition>> beanDefinitionMap = new ConcurrentHashMap<>();
 
-    public TsRpcClassPathBeanDefinitionScanner(
+    public TsRpcBeanDefinitionScanner(
             BeanDefinitionRegistry registry,
             boolean useDefaultFilters,
             Environment environment,
@@ -58,7 +58,7 @@ public class TsRpcClassPathBeanDefinitionScanner extends ClassPathBeanDefinition
         registerAnnotationConfigProcessors(registry);
     }
 
-    public TsRpcClassPathBeanDefinitionScanner(
+    public TsRpcBeanDefinitionScanner(
             BeanDefinitionRegistry registry, Environment environment, ResourceLoader resourceLoader) {
 
         this(registry, false, environment, resourceLoader);

@@ -16,31 +16,5 @@
 
 package com.wts.tsrpc.spring.config.annotation;
 
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-/**
- * Enable TsRpc bean as spring beans
- */
-
-@Inherited
-@Documented
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface EnableTsRpcServer {
-
-    /**
-     * The application id.
-     */
-    String applicationId();
-
-    /**
-     * The packages to scan TsRpc beans.
-     */
-    String[] basePackages() default {};
+public @interface TSClient {
 }

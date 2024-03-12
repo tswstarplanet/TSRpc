@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.wts.tsrpc.spring.config.annotation.parse;
+package com.wts.tsrpc.spring.config.annotation;
 
 import com.wts.tsrpc.exception.ConfigMistakeException;
-import com.wts.tsrpc.spring.config.annotation.EnableTsRpc;
-import com.wts.tsrpc.spring.config.annotation.ServiceAnnotationPostProcessor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -57,7 +55,7 @@ public class TsRpcScanRegistrar implements ImportBeanDefinitionRegistrar {
     }
 
     /**
-     * Registers {@link ServiceAnnotationPostProcessor}
+     * Registers {@link ServerPostProcessor}
      *
      * @param packagesToScan packages to scan without resolving placeholders
      * @param registry       {@link BeanDefinitionRegistry}
@@ -65,7 +63,7 @@ public class TsRpcScanRegistrar implements ImportBeanDefinitionRegistrar {
      */
     private void registerServiceAnnotationPostProcessor(Set<String> packagesToScan, BeanDefinitionRegistry registry) {
 
-        BeanDefinitionBuilder builder = rootBeanDefinition(ServiceAnnotationPostProcessor.class);
+        BeanDefinitionBuilder builder = rootBeanDefinition(ServerPostProcessor.class);
         builder.addConstructorArgValue(packagesToScan);
         builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();

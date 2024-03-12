@@ -20,6 +20,9 @@ public class ServiceMethod {
 
     private Class<?> returnType;
 
+    public ServiceMethod() {
+    }
+
     public ServiceMethod(String methodName) {
         this.methodName = methodName;
     }
@@ -37,12 +40,22 @@ public class ServiceMethod {
         this.methodName = methodName;
     }
 
+    public ServiceMethod methodName(String methodName) {
+        this.methodName = methodName;
+        return this;
+    }
+
     public Class<?>[] getArgTypes() {
         return argTypes;
     }
 
     public void setArgTypes(Class<?>[] argTypes) {
         this.argTypes = argTypes;
+    }
+
+    public ServiceMethod argTypes(Class<?>[] argTypes) {
+        this.argTypes = argTypes;
+        return this;
     }
 
     public Type[] getParameterTypes() {
@@ -53,12 +66,22 @@ public class ServiceMethod {
         this.parameterTypes = parameterTypes;
     }
 
+    public ServiceMethod parameterTypes(Type[] parameterTypes) {
+        this.parameterTypes = parameterTypes;
+        return this;
+    }
+
     public Class<?> getReturnType() {
         return returnType;
     }
 
     public void setReturnType(Class<?> returnType) {
         this.returnType = returnType;
+    }
+
+    public ServiceMethod returnType(Class<?> returnType) {
+        this.returnType = returnType;
+        return this;
     }
 
     @Override

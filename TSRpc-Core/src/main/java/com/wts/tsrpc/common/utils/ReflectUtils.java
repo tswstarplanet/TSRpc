@@ -1,10 +1,18 @@
 package com.wts.tsrpc.common.utils;
 
 import com.wts.tsrpc.server.service.ParameterType;
+import com.wts.tsrpc.server.service.ServiceMethod;
 import org.apache.commons.lang3.ArrayUtils;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class ReflectUtils {
     public static boolean isCollection(Class<?> clazz) {
@@ -88,5 +96,22 @@ public class ReflectUtils {
         return builder.toString();
     }
 
+    /**
+     * Get all public declared methods of a class
+     * @param clazz the class
+     * @return method list
+     */
+    public static List<Method> getPublicDeclaredMethods(Class<?> clazz) {
+        Method[] methods = clazz.getDeclaredMethods();
+        return Arrays.stream(methods).filter(method -> method.getModifiers() == Modifier.PUBLIC).toList();
+    }
 
+    public static ServiceMethod getServiceMethod(Method method) {
+        ServiceMethod serviceMethod = new ServiceMethod();
+        serviceMethod.setMethodName(method.getName());
+        serviceMethod.setArgTypes(method.getParameterTypes());
+        serviceMethod.setReturnType(method.getReturnType());
+        serviceMethod.setParameterTypes(method.getGenericParameterTypes());
+        return serviceMethod;
+    }
 }
