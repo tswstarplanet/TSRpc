@@ -39,9 +39,9 @@ public class TsRpcScanRegistrar implements ImportBeanDefinitionRegistrar {
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         Set<String> packagesToScan = getPackagesToScan(importingClassMetadata);
-
-        registerServiceAnnotationPostProcessor(packagesToScan, registry);
+        registerTSAnnotatedBeanDefinitionPostProcessor(packagesToScan, registry);
     }
+
 
     private Set<String> getPackagesToScan(AnnotationMetadata metadata) {
         // get from @EnableTsRpc
@@ -55,15 +55,15 @@ public class TsRpcScanRegistrar implements ImportBeanDefinitionRegistrar {
     }
 
     /**
-     * Registers {@link ServerPostProcessor}
+     * Registers {@link TSRpcBeanDefinitionPostProcessor}
      *
      * @param packagesToScan packages to scan without resolving placeholders
      * @param registry       {@link BeanDefinitionRegistry}
      * @since 2.5.8
      */
-    private void registerServiceAnnotationPostProcessor(Set<String> packagesToScan, BeanDefinitionRegistry registry) {
+    private void registerTSAnnotatedBeanDefinitionPostProcessor(Set<String> packagesToScan, BeanDefinitionRegistry registry) {
 
-        BeanDefinitionBuilder builder = rootBeanDefinition(ServerPostProcessor.class);
+        BeanDefinitionBuilder builder = rootBeanDefinition(TSRpcBeanDefinitionPostProcessor.class);
         builder.addConstructorArgValue(packagesToScan);
         builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();

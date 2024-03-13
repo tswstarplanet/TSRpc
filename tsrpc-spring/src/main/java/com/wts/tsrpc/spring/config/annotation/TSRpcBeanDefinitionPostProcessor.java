@@ -18,7 +18,9 @@ package com.wts.tsrpc.spring.config.annotation;
 
 import com.google.common.collect.Lists;
 import com.wts.tsrpc.common.utils.ReflectUtils;
+import com.wts.tsrpc.exception.ConfigMistakeException;
 import com.wts.tsrpc.exception.SystemException;
+import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.server.service.ServiceMethod;
 import com.wts.tsrpc.spring.config.annotation.utils.AnnotationUtils;
@@ -34,6 +36,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanNameGenerator;
@@ -61,14 +64,14 @@ import java.util.Set;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 import static org.springframework.util.ClassUtils.resolveClassName;
 
-public class ServerPostProcessor implements BeanDefinitionRegistryPostProcessor,
+public class TSRpcBeanDefinitionPostProcessor implements BeanDefinitionRegistryPostProcessor,
         EnvironmentAware,
         ResourceLoaderAware,
         BeanClassLoaderAware,
         ApplicationContextAware,
         InitializingBean {
 
-    private static final Logger logger = LoggerFactory.getLogger(ServerPostProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(TSRpcBeanDefinitionPostProcessor.class);
 
     private BeanDefinitionRegistry registry;
 
@@ -86,7 +89,7 @@ public class ServerPostProcessor implements BeanDefinitionRegistryPostProcessor,
 
     private static final List<Class<? extends Annotation>> serviceAnnotationTypes = Lists.newArrayList(TSService.class);
 
-    public ServerPostProcessor(Set<String> packagesToScan) {
+    public TSRpcBeanDefinitionPostProcessor(Set<String> packagesToScan) {
         this.packagesToScan = packagesToScan;
     }
 
@@ -103,8 +106,29 @@ public class ServerPostProcessor implements BeanDefinitionRegistryPostProcessor,
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
         this.registry = registry;
+        registerCommonBean();
         scanServiceBeans(resolvedPackagesToScan, registry);
     }
+
+    private void registerCommonBean() {
+        registerApplication();
+    }
+
+    private void registerApplication() {
+        BeanDefinitionBuilder builder = rootBeanDefinition(Application.class);
+        builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+        String applicationId = environment.getProperty(PropertySourceConfigConstants.APPLICATION_ID);
+        if (StringUtils.isEmpty(applicationId)) {
+            logger.error("No config of application id !");
+            throw new ConfigMistakeException("No config of application id !");
+        }
+        builder.addPropertyValue("applicationId", applicationId);
+        builder.addPropertyValue("version", environment.getProperty(PropertySourceConfigConstants.APPLICATION_VERSION, PropertySourceConfigConstants.DEFAULT_APPLICATION_VERSION));
+        AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+        BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, registry);
+    }
+
+
 
 //    @Override
 //    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
@@ -158,7 +182,7 @@ public class ServerPostProcessor implements BeanDefinitionRegistryPostProcessor,
 //    }
 
     private void scanServiceBeans(Set<String> packagesToScan, BeanDefinitionRegistry registry) {
-        var scanner = new TsRpcBeanDefinitionScanner(registry, environment, resourceLoader);
+        var scanner = new TSRpcBeanDefinitionScanner(registry, environment, resourceLoader);
         BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
         scanner.setBeanNameGenerator(beanNameGenerator);
         serviceAnnotationTypes.forEach(serviceAnnotationType -> {
