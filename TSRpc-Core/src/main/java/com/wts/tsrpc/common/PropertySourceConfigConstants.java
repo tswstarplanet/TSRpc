@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.wts.tsrpc.spring.config.annotation;
+package com.wts.tsrpc.common;
 
 /**
  * Constants of key of property source
@@ -25,9 +25,23 @@ public class PropertySourceConfigConstants {
 
     public static final String APPLICATION = "application";
 
+    public static final String NAMESPACE = "namespace";
+
     public static final String APPLICATION_ID = STR."\{GENERAL_PREFIX}.\{APPLICATION}.id";
 
     public static final String APPLICATION_VERSION = STR."\{GENERAL_PREFIX}.\{APPLICATION}.version";
 
     public static final String DEFAULT_APPLICATION_VERSION = "1.0";
+
+    public static final String REGISTRY = "registry";
+
+    public static final String REGISTRY_TYPE = STR."\{GENERAL_PREFIX}.\{REGISTRY}.type}";
+
+    public static final String REGISTRY_NAMESPACE = STR."\{GENERAL_PREFIX}.\{REGISTRY}.\{NAMESPACE}";
+
+    public static final String REGISTRY_TYPE_NACOS = "nacos";
+
+    public static final String REGISTRY_SERVER_LIST = STR."\{GENERAL_PREFIX}.\{REGISTRY}.serverList}";
+
+    public static final String DEFAULT_NAMESPACE = "default";
 }

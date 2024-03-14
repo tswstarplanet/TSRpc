@@ -17,10 +17,13 @@
 package com.wts.tsrpc.spring.config.annotation;
 
 import com.google.common.collect.Lists;
+import com.wts.tsrpc.common.PropertySourceConfigConstants;
+import com.wts.tsrpc.common.registry.RegistryFactory;
 import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.exception.ConfigMistakeException;
 import com.wts.tsrpc.exception.SystemException;
 import com.wts.tsrpc.server.manage.Application;
+import com.wts.tsrpc.server.manage.Manager;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.server.service.ServiceMethod;
 import com.wts.tsrpc.spring.config.annotation.utils.AnnotationUtils;
@@ -111,9 +114,21 @@ public class TSRpcBeanDefinitionPostProcessor implements BeanDefinitionRegistryP
     }
 
     private void registerCommonBean() {
+        registerManager();
         registerApplication();
+        registerRegistry();
     }
 
+    private void registerManager() {
+        BeanDefinitionBuilder builder = rootBeanDefinition(Manager.class);
+        builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+        AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+        BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, registry);
+    }
+
+    /**
+     * Registry application bean.
+     */
     private void registerApplication() {
         BeanDefinitionBuilder builder = rootBeanDefinition(Application.class);
         builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -124,6 +139,22 @@ public class TSRpcBeanDefinitionPostProcessor implements BeanDefinitionRegistryP
         }
         builder.addPropertyValue("applicationId", applicationId);
         builder.addPropertyValue("version", environment.getProperty(PropertySourceConfigConstants.APPLICATION_VERSION, PropertySourceConfigConstants.DEFAULT_APPLICATION_VERSION));
+        AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+        BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, registry);
+    }
+
+    private void registerRegistry() {
+        String registryType = environment.getProperty(PropertySourceConfigConstants.REGISTRY_TYPE, PropertySourceConfigConstants.REGISTRY_TYPE_NACOS);
+        Class<?> registryClass = RegistryFactory.getRegistryClass(registryType);
+        BeanDefinitionBuilder builder = rootBeanDefinition(registryClass);
+        builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+        String namespace = environment.getProperty(PropertySourceConfigConstants.REGISTRY_NAMESPACE, PropertySourceConfigConstants.DEFAULT_NAMESPACE);
+        String serverList = environment.getProperty(PropertySourceConfigConstants.REGISTRY_SERVER_LIST);
+        if (StringUtils.isEmpty(serverList)) {
+            throw new ConfigMistakeException("No server list config of registry !");
+        }
+        builder.addConstructorArgValue(serverList);
+        builder.addConstructorArgValue(namespace);
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
         BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, registry);
     }
