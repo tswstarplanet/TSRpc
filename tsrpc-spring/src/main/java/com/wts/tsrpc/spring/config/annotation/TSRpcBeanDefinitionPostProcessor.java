@@ -122,6 +122,7 @@ public class TSRpcBeanDefinitionPostProcessor implements BeanDefinitionRegistryP
     private void registerManager() {
         BeanDefinitionBuilder builder = rootBeanDefinition(Manager.class);
         builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+        builder.addPropertyValue("serviceInvoker", environment.getProperty(PropertySourceConfigConstants.MANAGER_SERVICE_INVOKER, PropertySourceConfigConstants.DEFAULT_MANAGER_INVOKER));
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
         BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, registry);
     }

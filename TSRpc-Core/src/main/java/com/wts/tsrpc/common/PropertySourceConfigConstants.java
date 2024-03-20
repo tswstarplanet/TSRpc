@@ -44,4 +44,10 @@ public class PropertySourceConfigConstants {
     public static final String REGISTRY_SERVER_LIST = STR."\{GENERAL_PREFIX}.\{REGISTRY}.serverList}";
 
     public static final String DEFAULT_NAMESPACE = "default";
+
+    public static final String MANAGER = "manager";
+
+    public static final String MANAGER_SERVICE_INVOKER = STR."\{GENERAL_PREFIX}.\{MANAGER}.serviceInvoker";
+
+    public static final String DEFAULT_MANAGER_INVOKER = "javassist";
 }
