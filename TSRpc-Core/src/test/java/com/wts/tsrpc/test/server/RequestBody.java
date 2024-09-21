@@ -1,6 +1,6 @@
 package com.wts.tsrpc.test.server;
 
-import com.wts.tsrpc.server.service.JacksonTransformer;
+import com.wts.tsrpc.common.transform.JacksonTransformer;
 import com.wts.tsrpc.server.service.ParameterType;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.common.ServiceRequest;

@@ -1,7 +1,7 @@
 package com.wts.tsrpc.client;
 
+import com.wts.tsrpc.common.transform.Transformers;
 import com.wts.tsrpc.exception.BizException;
-import com.wts.tsrpc.server.manage.Manager;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -28,7 +28,7 @@ public class HttpClient {
 
     private static final Map<Endpoint, HttpClient> httpClientMap = new ConcurrentHashMap<>();
 
-    private Manager manager;
+    private Transformers transformers;
 
     private final Integer workNum;
 
@@ -52,7 +52,7 @@ public class HttpClient {
                 .handler(new LoggingHandler(LogLevel.DEBUG))
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
-                .handler((new HttpClientInitializer()).manager(manager));
+                .handler((new HttpClientInitializer()).transformers(transformers));
         return this;
     }
 
@@ -66,8 +66,8 @@ public class HttpClient {
         return this.channelFuture = bootstrap.connect(host, port);
     }
 
-    public HttpClient manager(Manager manager) {
-        this.manager = manager;
+    public HttpClient transformers(Transformers transformers) {
+        this.transformers = transformers;
         return this;
     }
 

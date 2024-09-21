@@ -27,6 +27,10 @@ public class ServerProperties {
 
     private Integer workerNum = 10;
 
+    private String serviceInvoker;
+
+    private String transformType;
+
     public Integer getPort() {
         return port;
     }
@@ -49,5 +53,21 @@ public class ServerProperties {
 
     public void setWorkerNum(Integer workerNum) {
         this.workerNum = workerNum;
+    }
+
+    public String getServiceInvoker() {
+        return serviceInvoker;
+    }
+
+    public void setServiceInvoker(String serviceInvoker) {
+        this.serviceInvoker = serviceInvoker;
+    }
+
+    public String getTransformType() {
+        return transformType;
+    }
+
+    public void setTransformType(String transformType) {
+        this.transformType = transformType;
     }
 }

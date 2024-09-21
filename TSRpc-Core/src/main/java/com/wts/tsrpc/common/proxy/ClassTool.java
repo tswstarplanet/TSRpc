@@ -1,15 +1,24 @@
 package com.wts.tsrpc.common.proxy;
 
+import com.wts.tsrpc.client.ClientDispatcher;
 import com.wts.tsrpc.client.ClientInvoker;
 import com.wts.tsrpc.client.service.ClientMethod;
 import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.exception.BizException;
 import com.wts.tsrpc.server.manage.Application;
-import com.wts.tsrpc.server.manage.Manager;
+import com.wts.tsrpc.server.manage.ServerDispatcher;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.server.service.ServiceMethod;
-import javassist.*;
+import javassist.CannotCompileException;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtConstructor;
+import javassist.CtField;
+import javassist.CtMethod;
+import javassist.CtNewMethod;
+import javassist.Modifier;
+import javassist.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +41,18 @@ public class ClassTool {
 
     private static final Object proxyObjectLock = new Object();
 
-    private Manager manager;
+    private ServerDispatcher serverDispatcher;
 
-    public ClassTool manager(Manager manager) {
-        this.manager = manager;
+    private ClientDispatcher clientDispatcher;
+
+    public ClassTool manager(ServerDispatcher serverDispatcher, ClientDispatcher clientDispatcher) {
+        this.serverDispatcher = serverDispatcher;
+        this.clientDispatcher = clientDispatcher;
+        return this;
+    }
+
+    public ClassTool serverDispatcher(ServerDispatcher serverDispatcher) {
+        this.serverDispatcher = serverDispatcher;
         return this;
     }
 
@@ -101,7 +118,7 @@ public class ClassTool {
                         cc.addMethod(CtNewMethod.make(callMethodBody.toString(), cc));
 
                         Class<?> clazz = cc.toClass();
-                        ServiceWrapper proxyObject = (ServiceWrapper) clazz.getConstructor(serviceClazz).newInstance(manager.getServiceObject(service.getServiceId()));
+                        ServiceWrapper proxyObject = (ServiceWrapper) clazz.getConstructor(serviceClazz).newInstance(serverDispatcher.getServiceObject(service.getServiceId()));
                         proxyObjectMap.put(service.getServiceId(), proxyObject);
                         return proxyObject;
                     } catch (ClassNotFoundException e) {
@@ -201,7 +218,7 @@ public class ClassTool {
             }
             cc.writeFile("log4j2_logs/");
             Class<?> clazz = cc.toClass();
-            return clazz.getConstructor(ClientInvoker.class).newInstance(manager.getClientInvoker(application.getKey(), clientService.getServiceId()));
+            return clazz.getConstructor(ClientInvoker.class).newInstance(clientDispatcher.getClientInvoker(application.getKey(), clientService.getServiceId()));
         } catch (CannotCompileException e) {
             logger.error("error: ", e);
             throw new BizException(STR."The class [\{clientServiceClazz.getName()} can not be compiled !");

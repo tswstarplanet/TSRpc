@@ -4,11 +4,12 @@ import com.wts.tsrpc.common.HttpUtils;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.common.ServiceResponseCode;
-import com.wts.tsrpc.server.manage.Manager;
+import com.wts.tsrpc.common.transform.Transformers;
 import com.wts.tsrpc.common.utils.Checker;
 import com.wts.tsrpc.common.utils.GsonUtils;
 import com.wts.tsrpc.common.utils.HttpContentType;
 import com.wts.tsrpc.common.utils.ResponseUtils;
+import com.wts.tsrpc.server.manage.ServerDispatcher;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -32,14 +33,21 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     private static final Logger logger = LoggerFactory.getLogger(HttpServerHandler.class);
 
-    private Manager manager;
+    private Transformers transformers;
+
+    private ServerDispatcher serverDispatcher;
 
     public HttpServerHandler() {
 
     }
 
-    public HttpServerHandler manager(Manager manager) {
-        this.manager = manager;
+    public HttpServerHandler transformers(Transformers transformers) {
+        this.transformers = transformers;
+        return this;
+    }
+
+    public HttpServerHandler serverDispatcher(ServerDispatcher serverDispatcher) {
+        this.serverDispatcher = serverDispatcher;
         return this;
     }
 
@@ -61,9 +69,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
             String body = HttpUtils.getBody(request);
 
-            ServiceRequest serviceRequest = manager.getTransform(request.headers().get("transformType")).transformRequest(body);
+            ServiceRequest serviceRequest = transformers.getTransform(request.headers().get("transformType")).transformRequest(body);
 
-            ServiceResponse serviceResponse = manager.getDispatcher().dispatch(serviceRequest);
+            ServiceResponse serviceResponse = serverDispatcher.dispatch(serviceRequest);
 
             logger.info("channel = " + ctx.channel() + ", pipeline = " + ctx.pipeline() + ", channel of pipeline: " + ctx.pipeline().channel());
             logger.info("current handler = " + ctx.handler());
@@ -106,16 +114,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             }
         }
         return params;
-    }
-
-
-
-    public Manager getManager() {
-        return manager;
-    }
-
-    public void setManager(Manager manager) {
-        this.manager = manager;
     }
 
     public static void main(String[] args) {

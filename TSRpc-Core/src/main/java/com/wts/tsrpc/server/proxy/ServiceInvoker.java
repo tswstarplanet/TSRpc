@@ -6,5 +6,5 @@ import com.wts.tsrpc.server.service.Service;
 
 public interface ServiceInvoker {
 
-    void invoke(ServiceRequest request, ServiceResponse response, Service service);
+    void invoke(ServiceRequest request, ServiceResponse response);
 }

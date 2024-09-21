@@ -8,9 +8,9 @@ import com.wts.tsrpc.server.HttpServerInitializer;
 import com.wts.tsrpc.server.filter.CheckServerInvokerFilter;
 import com.wts.tsrpc.server.filter.LogServerInvokerFilter;
 import com.wts.tsrpc.server.manage.Application;
-import com.wts.tsrpc.server.manage.Dispatcher;
 import com.wts.tsrpc.server.manage.Manager;
-import com.wts.tsrpc.server.service.JacksonTransformer;
+import com.wts.tsrpc.server.manage.ServerDispatcher;
+import com.wts.tsrpc.common.transform.JacksonTransformer;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.server.service.ServiceMethod;
 
@@ -33,7 +33,7 @@ public class Main {
 
         manager.application(application)
                 .addService("complexService", service)
-                .dispatcher(new Dispatcher()
+                .dispatcher(new ServerDispatcher()
                         .manager(manager))
                 .addServiceObj("complexService", new ProviderService())
                 .addTransformer("jackson", (new JacksonTransformer())

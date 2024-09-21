@@ -1,10 +1,10 @@
 package com.wts.tsrpc.client.filter;
 
-import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.client.HttpClient;
+import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
-import com.wts.tsrpc.server.manage.Manager;
+import com.wts.tsrpc.common.transform.Transformers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +13,11 @@ import java.util.concurrent.TimeUnit;
 public class ClientInvokerFilterChain implements ClientInvokerFilter {
     private int pos = 0;
 
-    private Manager manager;
-
     private ClientService clientService;
 
     private HttpClient httpClient;
+
+    private Transformers transformers;
 
     private List<ClientInvokerFilter> invokerFilters = new ArrayList<>();
 
@@ -29,7 +29,7 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
     public void doFilter(ServiceRequest serviceRequest, ClientInvokerFilterChain filterChain) {
         if (pos == invokerFilters.size()) {
 //            ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
-            String message = manager.getTransform(clientService.getTransformType()).transformRequestToString(serviceRequest);
+            String message = transformers.getTransform(clientService.getTransformType()).transformRequestToString(serviceRequest);
             try {
                 httpClient.connect().await(30, TimeUnit.SECONDS);
 //            httpClient.connect().addListener(_ ->
@@ -66,6 +66,10 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
         return this;
     }
 
+    public Transformers getTransformers() {
+        return transformers;
+    }
+
     public HttpClient getHttpClient() {
         return httpClient;
     }
@@ -84,12 +88,8 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
         return this;
     }
 
-    public Manager getManager() {
-        return manager;
-    }
-
-    public ClientInvokerFilterChain manager(Manager manager) {
-        this.manager = manager;
+    public ClientInvokerFilterChain transformers(Transformers transformers) {
+        this.transformers = transformers;
         return this;
     }
 }

@@ -1,12 +1,11 @@
 package com.wts.tsrpc.server.manage;
 
 import com.wts.tsrpc.client.ClientInvoker;
+import com.wts.tsrpc.client.filter.ClientInvokerFilter;
 import com.wts.tsrpc.client.service.ClientMethod;
 import com.wts.tsrpc.client.service.ClientService;
-import com.wts.tsrpc.client.filter.ClientInvokerFilter;
 import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.exception.BizException;
-import com.wts.tsrpc.server.filter.ServerInvokerFilter;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.server.service.ServiceMethod;
 import com.wts.tsrpc.server.service.Transformer;
@@ -23,27 +22,22 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Manager {
 
     private Application application;
-    private Map<String, Service> serviceMap = new ConcurrentHashMap<>();
 
-    private final Map<String, Object> serviceObjectMap = new ConcurrentHashMap<>();
+    private String serviceInvoker;
+
+    private ServerDispatcher serverDispatcher;
+
+    private final Map<String, Service> serviceMap = new ConcurrentHashMap<>();
 
     private final Map<String, Transformer> transformerMap = new ConcurrentHashMap<>();
 
-    private final Map<String, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
-
-    private final List<ServerInvokerFilter> defaultServiceInvokerFilters = new ArrayList<>();
 
     private final List<ClientInvokerFilter> defaultClientInvokerFilters = new ArrayList<>();
 
     private static final Object serviceLock = new Object();
 
-    private static final Object objectLock = new Object();
 
     private static final Object transformLock = new Object();
-
-    private static final Object dispatcherLock = new Object();
-
-    private static final Manager manager = new Manager();
 
 //    private final Map<String, List<Type>> serviceParamTypeMap = new ConcurrentHashMap<>();
 
@@ -52,7 +46,7 @@ public class Manager {
     /**
      * Generic type map of methods of service on client side.
      */
-    private final Map<String, Map<String, List<Type>>> clientMethodParamTypeMap = new ConcurrentHashMap<>();
+//    private final Map<String, Map<String, List<Type>>> clientMethodParamTypeMap = new ConcurrentHashMap<>();
 
     private final Map<String, Map<String, Type>> clientServiceReturnValueTypeMap = new ConcurrentHashMap<>();
 
@@ -60,21 +54,25 @@ public class Manager {
 
     private final Map<String, Map<String, ClientInvoker>> clientInvokerMap = new ConcurrentHashMap<>();
 
-    private String serviceInvoker;
 
-    private Dispatcher dispatcher;
-
-    public Dispatcher getDispatcher() {
-        return dispatcher;
-    }
 
     public Manager() {
 
     }
 
+    public Manager(Application application, String serviceInvoker, ServerDispatcher serverDispatcher) {
+        this.application = application;
+        this.serviceInvoker = serviceInvoker;
+        this.serverDispatcher = serverDispatcher;
+    }
+
     public Manager application(Application application) {
         this.application = application;
         return this;
+    }
+
+    public ServerDispatcher getDispatcher() {
+        return serverDispatcher;
     }
 
     public Manager serviceInvoker(String serviceInvoker) {
@@ -156,10 +154,6 @@ public class Manager {
         }
     }
 
-    public ClientService getClientService(String applicationId, String serviceId) {
-        return clientServiceMap.get(applicationId).get(serviceId);
-    }
-
 //    public Manager addServiceReturnValueType(String serviceId, Service service) {
 //        if (StringUtils.isEmpty(serviceId)) {
 //            throw new BizException("ServiceId can not be empty !");
@@ -182,17 +176,17 @@ public class Manager {
 //        }
 //    }
 
-    public Type getClientServiceReturnValueType(String serviceId, String methodSignature) {
-        return clientServiceReturnValueTypeMap.get(serviceId).get(methodSignature);
-    }
-
-    public List<Type> getServiceMethodParamTypes(String serviceId, String methodSignature) {
-        return List.of(serviceMethodParamTypeMap.get(serviceId).get(methodSignature).toArray(new Type[0]));
-    }
-
-    public List<Type> getClientMethodParamTypes(String serviceId, String methodSignature) {
-        return List.of(clientMethodParamTypeMap.get(serviceId).get(methodSignature).toArray(new Type[0]));
-    }
+//    public Type getClientServiceReturnValueType(String serviceId, String methodSignature) {
+//        return clientServiceReturnValueTypeMap.get(serviceId).get(methodSignature);
+//    }
+//
+//    public List<Type> getServiceMethodParamTypes(String serviceId, String methodSignature) {
+//        return List.of(serviceMethodParamTypeMap.get(serviceId).get(methodSignature).toArray(new Type[0]));
+//    }
+//
+//    public List<Type> getClientMethodParamTypes(String serviceId, String methodSignature) {
+//        return List.of(clientMethodParamTypeMap.get(serviceId).get(methodSignature).toArray(new Type[0]));
+//    }
 
     public Manager addService(String serviceId, Service service) {
         if (StringUtils.isEmpty(serviceId)) {
@@ -222,24 +216,6 @@ public class Manager {
             } catch (NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
-        }
-        return this;
-    }
-
-
-
-    public Manager addServiceObj(String serviceId, Object object) {
-        if (StringUtils.isEmpty(serviceId)) {
-            throw new BizException("ServiceId can not be empty !");
-        }
-        if (object == null) {
-            throw new BizException("Service can not be null !");
-        }
-        synchronized (objectLock) {
-            if (serviceObjectMap.containsKey(serviceId)) {
-                throw new BizException("The object has been exist in the object map !");
-            }
-            serviceObjectMap.put(serviceId, object);
         }
         return this;
     }
@@ -276,41 +252,18 @@ public class Manager {
 //        return this;
 //    }
 
-    public Manager dispatcher(Dispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-        return this;
-    }
-
-    public Manager addServiceInvokerFilter(ServerInvokerFilter invokerFilter) {
-        defaultServiceInvokerFilters.add(invokerFilter);
-        return this;
-    }
 
     public Manager addClientInvokerFilter(ClientInvokerFilter invokerFilter) {
         defaultClientInvokerFilters.add(invokerFilter);
         return this;
     }
 
-    public Service getService(String serviceId) {
-        if (StringUtils.isEmpty(serviceId)) {
-            throw new BizException("Service id is null !");
-        }
-        return serviceMap.get(serviceId);
-    }
-
-    public Object getServiceObject(String serviceId) {
-        if (StringUtils.isEmpty(serviceId)) {
-            throw new BizException("Service id is empty !");
-        }
-        return serviceObjectMap.get(serviceId);
-    }
-
-    public Transformer getTransform(String transformType) {
-        if (StringUtils.isEmpty(transformType)) {
-            throw new BizException("Transform type is empty !");
-        }
-        return transformerMap.get(transformType);
-    }
+//    public Transformer getTransform(String transformType) {
+//        if (StringUtils.isEmpty(transformType)) {
+//            throw new BizException("Transform type is empty !");
+//        }
+//        return transformerMap.get(transformType);
+//    }
 
 //    public Dispatcher getDispatcher(String dispatcherType) {
 //        if (StringUtils.isEmpty(dispatcherType)) {
@@ -319,13 +272,6 @@ public class Manager {
 //        return dispatcherMap.get(dispatcherType);
 //    }
 
-    public List<ServerInvokerFilter> getDefaultServiceInvokerFilters() {
-        return List.copyOf(defaultServiceInvokerFilters);
-    }
-
-    public String getServiceInvoker() {
-        return serviceInvoker;
-    }
 
     public List<ClientInvokerFilter> getDefaultClientInvokerFilters() {
         return List.copyOf(defaultClientInvokerFilters);

@@ -1,11 +1,14 @@
-package com.wts.tsrpc.server.service;
+package com.wts.tsrpc.common.transform;
 
+import com.wts.tsrpc.client.ClientDispatcher;
 import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.common.utils.JacksonUtils;
 import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.common.utils.SerialNoUtils;
+import com.wts.tsrpc.server.manage.ServerDispatcher;
+import com.wts.tsrpc.server.service.ServiceMethod;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Type;
@@ -18,6 +21,10 @@ public class JacksonTransformer extends AbstractTransform {
 
     }
 
+    public JacksonTransformer(ServerDispatcher serverDispatcher, ClientDispatcher clientDispatcher) {
+        super(serverDispatcher, clientDispatcher);
+    }
+
     @Override
     public ServiceRequest transformRequest(String body) {
         ServiceRequest request = JacksonUtils.parseObject(body, ServiceRequest.class);
@@ -26,7 +33,7 @@ public class JacksonTransformer extends AbstractTransform {
         }
         for (int i = 0; i < request.getParamValueStrings().length; i++) {
             ServiceMethod method = new ServiceMethod(request.getMethodName(), ReflectUtils.getClazzFromName(request.getArgTypeNames()));
-            request.getParamValues()[i] = JacksonUtils.parseObject(request.getParamValueStrings()[i], getManager().getServiceMethodParamTypes(request.getServiceId(), ReflectUtils.getMethodSignature(method.getMethodName(), method.getArgTypes())).get(i));
+            request.getParamValues()[i] = JacksonUtils.parseObject(request.getParamValueStrings()[i], getServerDispatcher().getServiceMethodParamTypes(request.getServiceId(), ReflectUtils.getMethodSignature(method.getMethodName(), method.getArgTypes())).get(i));
         }
         return request;
     }
@@ -38,7 +45,7 @@ public class JacksonTransformer extends AbstractTransform {
             response.setReturnValue(null);
             return response;
         }
-        response.setReturnValue(JacksonUtils.parseObject(response.getReturnValueString(), getManager().getClientService(response.getApplicationId(), response.getServiceId()).getMethodReturnGenericType(ReflectUtils.getMethodSignature(response.getMethodName(), response.getMethodParamTypeNames()))));
+        response.setReturnValue(JacksonUtils.parseObject(response.getReturnValueString(), getClientDispatcher().getClientService(response.getApplicationId(), response.getServiceId()).getMethodReturnGenericType(ReflectUtils.getMethodSignature(response.getMethodName(), response.getMethodParamTypeNames()))));
         return response;
     }
 

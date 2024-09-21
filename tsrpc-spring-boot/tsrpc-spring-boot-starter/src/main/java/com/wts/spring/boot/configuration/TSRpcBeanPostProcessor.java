@@ -16,16 +16,19 @@
 
 package com.wts.spring.boot.configuration;
 
-import com.wts.tsrpc.server.manage.Manager;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 
-@Configuration
-public class TSRpcConfiguration {
+/**
+ *
+ */
+public class TSRpcBeanPostProcessor implements BeanPostProcessor {
 
-    @Bean
-    public Manager manager() {
-        return new Manager();
+
+
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        return bean;
     }
-
 }

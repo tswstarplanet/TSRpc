@@ -13,7 +13,7 @@ import com.wts.tsrpc.common.registry.Registry;
 import com.wts.tsrpc.common.utils.JacksonUtils;
 import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.Manager;
-import com.wts.tsrpc.server.service.JacksonTransformer;
+import com.wts.tsrpc.common.transform.JacksonTransformer;
 import com.wts.tsrpc.test.server.*;
 
 import java.util.ArrayList;
