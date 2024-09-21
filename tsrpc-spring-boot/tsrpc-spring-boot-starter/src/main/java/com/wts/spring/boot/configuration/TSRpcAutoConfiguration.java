@@ -17,18 +17,32 @@
 package com.wts.spring.boot.configuration;
 
 import com.wts.spring.boot.configuration.properties.ApplicationConfigurationProperties;
+import com.wts.spring.boot.configuration.properties.LoadBalancerProperties;
+import com.wts.spring.boot.configuration.properties.NacosRegistryProperties;
+import com.wts.spring.boot.configuration.properties.RegistryProperties;
 import com.wts.spring.boot.configuration.properties.ServerProperties;
+import com.wts.tsrpc.client.loadbalance.LoadBalancer;
+import com.wts.tsrpc.client.loadbalance.RandomLoadBalancer;
+import com.wts.tsrpc.common.registry.NacosRegistry;
+import com.wts.tsrpc.common.registry.Registry;
 import com.wts.tsrpc.common.transform.JacksonTransformer;
 import com.wts.tsrpc.common.transform.Transformers;
+import com.wts.tsrpc.exception.SystemException;
 import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.ServerDispatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
-@EnableConfigurationProperties({ApplicationConfigurationProperties.class, ServerProperties.class})
+@AutoConfiguration
+@EnableConfigurationProperties({ApplicationConfigurationProperties.class, ServerProperties.class, RegistryProperties.class,
+        NacosRegistryProperties.class, LoadBalancerProperties.class})
 public class TSRpcAutoConfiguration {
+
+    private static final Logger logger = LoggerFactory.getLogger(TSRpcAutoConfiguration.class);
 
 //    @Bean
 //    @ConditionalOnMissingBean
@@ -63,5 +77,20 @@ public class TSRpcAutoConfiguration {
         return new TSRpcBeanPostProcessor();
     }
 
+    @Bean
+    @ConditionalOnProperty(prefix = "tsrpc.registry", name = "name", havingValue = "nacos")
+    public Registry registry(RegistryProperties registryProperties, NacosRegistryProperties nacosRegistryProperties) {
+        return new NacosRegistry(nacosRegistryProperties.getServerList(), nacosRegistryProperties.getNamespace());
+    }
 
+    @Bean
+    @ConditionalOnProperty(prefix = "tsrpc.loadbalancer", name = "type", havingValue = "random")
+    public LoadBalancer loadBalancer(Registry registry) {
+        if (registry == null) {
+            String errorMsg = "Registry is null, please check the configuration";
+            logger.error(errorMsg);
+            throw new SystemException(errorMsg);
+        }
+        return new RandomLoadBalancer(registry);
+    }
 }
