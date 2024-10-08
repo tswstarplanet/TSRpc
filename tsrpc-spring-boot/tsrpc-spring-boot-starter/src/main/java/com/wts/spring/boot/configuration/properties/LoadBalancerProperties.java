@@ -16,11 +16,13 @@
 
 package com.wts.spring.boot.configuration.properties;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "tsrpc.loadbalancer")
 public class LoadBalancerProperties {
 
+    @NotNull(message = "Required property 'tsrpc.loadbalancer.type' is missing.")
     private String type;
 
     public String getType() {

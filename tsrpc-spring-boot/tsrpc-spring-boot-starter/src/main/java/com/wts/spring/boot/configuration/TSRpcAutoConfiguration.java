@@ -40,6 +40,7 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @EnableConfigurationProperties({ApplicationConfigurationProperties.class, ServerProperties.class, RegistryProperties.class,
         NacosRegistryProperties.class, LoadBalancerProperties.class})
+@ConditionalOnProperty(prefix = "tsrpc.registry", name = "name", havingValue = "nacos")
 public class TSRpcAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(TSRpcAutoConfiguration.class);
@@ -79,7 +80,10 @@ public class TSRpcAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "tsrpc.registry", name = "name", havingValue = "nacos")
-    public Registry registry(RegistryProperties registryProperties, NacosRegistryProperties nacosRegistryProperties) {
+    public Registry registry(NacosRegistryProperties nacosRegistryProperties) {
+        if (!nacosRegistryProperties.isEnable()) {
+            return null;
+        }
         return new NacosRegistry(nacosRegistryProperties.getServerList(), nacosRegistryProperties.getNamespace());
     }
 
