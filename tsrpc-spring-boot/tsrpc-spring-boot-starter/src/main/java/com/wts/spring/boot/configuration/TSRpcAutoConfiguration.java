@@ -30,6 +30,7 @@ import com.wts.tsrpc.common.transform.Transformers;
 import com.wts.tsrpc.exception.SystemException;
 import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.ServerDispatcher;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -81,8 +82,15 @@ public class TSRpcAutoConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = "tsrpc.registry", name = "name", havingValue = "nacos")
     public Registry registry(NacosRegistryProperties nacosRegistryProperties) {
-        if (!nacosRegistryProperties.isEnable()) {
-            return null;
+        if (StringUtils.isEmpty(nacosRegistryProperties.getServerList())) {
+            String errorMsg = "Nacos server list is null, please check the configuration";
+            logger.error(errorMsg);
+            throw new SystemException(errorMsg);
+        }
+        if (StringUtils.isEmpty(nacosRegistryProperties.getNamespace())) {
+            String errorMsg = "Nacos namespace is null, please check the configuration";
+            logger.error(errorMsg);
+            throw new SystemException(errorMsg);
         }
         return new NacosRegistry(nacosRegistryProperties.getServerList(), nacosRegistryProperties.getNamespace());
     }

@@ -16,7 +16,7 @@
  */
 package com.wts.tsrpc.spring.config.annotation;
 
-import com.wts.tsrpc.spring.config.annotation.utils.AnnotationUtils;
+import com.wts.tsrpc.spring.utils.AnnotationUtils;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;

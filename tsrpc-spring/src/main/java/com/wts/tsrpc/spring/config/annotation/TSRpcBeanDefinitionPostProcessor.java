@@ -26,7 +26,7 @@ import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.Manager;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.server.service.ServiceMethod;
-import com.wts.tsrpc.spring.config.annotation.utils.AnnotationUtils;
+import com.wts.tsrpc.spring.utils.AnnotationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

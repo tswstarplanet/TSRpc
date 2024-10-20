@@ -16,19 +16,30 @@
 
 package com.wts.spring.boot.configuration;
 
+import com.wts.tsrpc.spring.config.annotation.TSClient;
+import com.wts.tsrpc.spring.config.annotation.TSService;
+import com.wts.tsrpc.spring.utils.AnnotationUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.stereotype.Component;
 
 /**
  *
  */
+@Component
 public class TSRpcBeanPostProcessor implements BeanPostProcessor {
-
-
-
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (!AnnotationUtils.isAnnotatedWith(bean.getClass(), TSService.class) || !AnnotationUtils.isAnnotatedWith(bean.getClass(), TSClient.class)) {
+            return bean;
+        }
+        if (AnnotationUtils.isAnnotatedWith(bean.getClass(), TSService.class)) {
+
+        }
+        if (AnnotationUtils.isAnnotatedWith(bean.getClass(), TSClient.class)) {
+
+        }
         return bean;
     }
 }

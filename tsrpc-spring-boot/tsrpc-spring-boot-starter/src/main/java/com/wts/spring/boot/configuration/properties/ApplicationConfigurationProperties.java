@@ -16,13 +16,16 @@
 
 package com.wts.spring.boot.configuration.properties;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "tsrpc.application")
 public class ApplicationConfigurationProperties {
 
+    @NotNull(message = "Required property 'tsrpc.application.applicationId' is missing.")
     private String applicationId;
 
+    @NotNull(message = "Required property 'tsrpc.application.version' is missing.")
     private String version;
 
     public String getApplicationId() {

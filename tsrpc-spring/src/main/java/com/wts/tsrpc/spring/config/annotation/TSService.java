@@ -17,6 +17,8 @@
 package com.wts.tsrpc.spring.config.annotation;
 
 
+import org.springframework.stereotype.Component;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -26,6 +28,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
+@Component
 public @interface TSService {
 
     String serviceId();
