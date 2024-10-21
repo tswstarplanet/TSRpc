@@ -21,12 +21,14 @@ import com.wts.spring.boot.configuration.properties.LoadBalancerProperties;
 import com.wts.spring.boot.configuration.properties.NacosRegistryProperties;
 import com.wts.spring.boot.configuration.properties.RegistryProperties;
 import com.wts.spring.boot.configuration.properties.ServerProperties;
+import com.wts.tsrpc.client.Endpoint;
 import com.wts.tsrpc.client.loadbalance.LoadBalancer;
 import com.wts.tsrpc.client.loadbalance.RandomLoadBalancer;
 import com.wts.tsrpc.common.registry.NacosRegistry;
 import com.wts.tsrpc.common.registry.Registry;
 import com.wts.tsrpc.common.transform.JacksonTransformer;
 import com.wts.tsrpc.common.transform.Transformers;
+import com.wts.tsrpc.common.utils.NetworkUtils;
 import com.wts.tsrpc.exception.SystemException;
 import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.ServerDispatcher;
@@ -34,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -80,8 +83,9 @@ public class TSRpcAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnBean(Application.class)
     @ConditionalOnProperty(prefix = "tsrpc.registry", name = "name", havingValue = "nacos")
-    public Registry registry(NacosRegistryProperties nacosRegistryProperties) {
+    public Registry registry(NacosRegistryProperties nacosRegistryProperties, ServerProperties serverProperties, Application application) {
         if (StringUtils.isEmpty(nacosRegistryProperties.getServerList())) {
             String errorMsg = "Nacos server list is null, please check the configuration";
             logger.error(errorMsg);
@@ -104,5 +108,10 @@ public class TSRpcAutoConfiguration {
             throw new SystemException(errorMsg);
         }
         return new RandomLoadBalancer(registry);
+    }
+
+    @Bean("serverEndpoint")
+    public Endpoint endpoint(ServerProperties serverProperties) {
+        return new Endpoint(NetworkUtils.getLocalHost(), serverProperties.getPort());
     }
 }
