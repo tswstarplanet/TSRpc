@@ -16,13 +16,34 @@
  */
 package com.wts.tsrpc.spring.utils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 
 @SuppressWarnings("unchecked")
 public class AnnotationUtils {
 
+    /**
+     * Check if an annotation of the specified {@code annotationClass} is
+     * @param element AnnotatedElement
+     * @param annotationClass annotation class
+     * @return true if the annotation is present, false otherwise
+     */
     public static boolean isAnnotatedWith(AnnotatedElement element, Class<?> annotationClass) {
         return element.isAnnotationPresent(annotationClass.asSubclass(java.lang.annotation.Annotation.class));
+    }
+
+    /**
+     * Find a single {@link Annotation} of {@code annotationType} on the specified {@link AnnotatedElement}.
+     * @param annotatedClass AnnotatedElement
+     * @param annotationClass annotation class
+     * @param <T> annotation type
+     * @return the annotation, or {@code null} if not found
+     */
+    public static <T extends Annotation> T getAnnotationInfo(Class<?> annotatedClass, Class<T> annotationClass) {
+        if (annotatedClass.isAnnotationPresent(annotationClass)) {
+            return annotatedClass.getAnnotation(annotationClass);
+        }
+        return null;
     }
 
 }

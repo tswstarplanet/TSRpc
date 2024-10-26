@@ -30,6 +30,7 @@ import com.wts.tsrpc.common.transform.JacksonTransformer;
 import com.wts.tsrpc.common.transform.Transformers;
 import com.wts.tsrpc.common.utils.NetworkUtils;
 import com.wts.tsrpc.exception.SystemException;
+import com.wts.tsrpc.server.HttpServer;
 import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.ServerDispatcher;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +45,6 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @EnableConfigurationProperties({ApplicationConfigurationProperties.class, ServerProperties.class, RegistryProperties.class,
         NacosRegistryProperties.class, LoadBalancerProperties.class})
-@ConditionalOnProperty(prefix = "tsrpc.registry", name = "name", havingValue = "nacos")
 public class TSRpcAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(TSRpcAutoConfiguration.class);
@@ -113,5 +113,15 @@ public class TSRpcAutoConfiguration {
     @Bean("serverEndpoint")
     public Endpoint endpoint(ServerProperties serverProperties) {
         return new Endpoint(NetworkUtils.getLocalHost(), serverProperties.getPort());
+    }
+
+    @Bean("serverDispatcher")
+    public ServerDispatcher serverDispatcher(ServerProperties serverProperties) {
+        return new ServerDispatcher(serverProperties.getServiceInvoker());
+    }
+
+    @Bean("httpServer")
+    public HttpServer httpServer(ServerProperties serverProperties, ServerDispatcher serverDispatcher) {
+        return new HttpServer(serverProperties.getPort(), serverProperties.getBossNum(), serverProperties.getWorkerNum());
     }
 }

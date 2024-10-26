@@ -16,9 +16,11 @@
 
 package com.wts.spring.boot.configuration;
 
+import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.spring.config.annotation.TSClient;
 import com.wts.tsrpc.spring.config.annotation.TSService;
 import com.wts.tsrpc.spring.utils.AnnotationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
@@ -44,6 +46,17 @@ public class TSRpcBeanPostProcessor implements BeanPostProcessor, ApplicationCon
             return bean;
         }
         if (AnnotationUtils.isAnnotatedWith(bean.getClass(), TSService.class)) {
+            TSService tsService = AnnotationUtils.getAnnotationInfo(bean.getClass(), TSService.class);
+            Service service = new Service();
+            service.classFullName(bean.getClass().getName());
+            service.serviceId(StringUtils.isEmpty(tsService.serviceId()) ? bean.getClass().getName() : tsService.serviceId());
+            if (tsService.exportAllPublicMethods()) {
+
+            }
+//                    .classFullName("com.wts.tsrpc.test.server.ProviderService")
+//                    .serviceId("complexService")
+//                    .method(new ServiceMethod("complexService", new Class<?>[]{Request.class, String.class}))
+//                    .method(new ServiceMethod("func", new Class<?>[]{List.class}));
 
         }
         if (AnnotationUtils.isAnnotatedWith(bean.getClass(), TSClient.class)) {

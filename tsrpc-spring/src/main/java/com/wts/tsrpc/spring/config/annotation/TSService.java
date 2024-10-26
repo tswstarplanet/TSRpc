@@ -33,5 +33,5 @@ public @interface TSService {
 
     String serviceId();
 
-    boolean exportAllMethods() default true;
+    boolean exportAllPublicMethods() default true;
 }
