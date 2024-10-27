@@ -18,8 +18,12 @@ package com.wts.spring.boot.configuration.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.List;
+
 @ConfigurationProperties(prefix = "tsrpc.server")
 public class ServerProperties {
+
+    private String protocol;
 
     private Integer port = 6688;
 
@@ -30,6 +34,18 @@ public class ServerProperties {
     private String serviceInvoker;
 
     private String transformType;
+
+    private List<String> invokerFilters;
+
+    private List<String> transformers;
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
 
     public Integer getPort() {
         return port;
@@ -69,5 +85,21 @@ public class ServerProperties {
 
     public void setTransformType(String transformType) {
         this.transformType = transformType;
+    }
+
+    public List<String> getInvokerFilters() {
+        return invokerFilters;
+    }
+
+    public void setInvokerFilters(List<String> invokerFilters) {
+        this.invokerFilters = invokerFilters;
+    }
+
+    public List<String> getTransformers() {
+        return transformers;
+    }
+
+    public void setTransformers(List<String> transformers) {
+        this.transformers = transformers;
     }
 }

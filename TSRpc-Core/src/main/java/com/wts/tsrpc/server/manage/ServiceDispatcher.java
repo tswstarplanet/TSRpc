@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ServerDispatcher {
+public class ServiceDispatcher {
 
     private final List<ServerInvokerFilter> defaultServiceInvokerFilters = new ArrayList<>();
 
@@ -37,11 +37,11 @@ public class ServerDispatcher {
 
     private static final Object objectLock = new Object();
 
-    public ServerDispatcher() {
+    public ServiceDispatcher() {
 
     }
 
-    public ServerDispatcher(String serviceInvoker) {
+    public ServiceDispatcher(String serviceInvoker) {
         this.serviceInvoker = serviceInvoker;
     }
 
@@ -69,7 +69,7 @@ public class ServerDispatcher {
         return response;
     }
 
-    public ServerDispatcher addServiceInvokerFilter(ServerInvokerFilter invokerFilter) {
+    public ServiceDispatcher addServiceInvokerFilter(ServerInvokerFilter invokerFilter) {
         defaultServiceInvokerFilters.add(invokerFilter);
         return this;
     }
@@ -78,7 +78,7 @@ public class ServerDispatcher {
         return List.copyOf(defaultServiceInvokerFilters);
     }
 
-    public ServerDispatcher addService(String serviceId, Service service) {
+    public ServiceDispatcher addService(String serviceId, Service service) {
         if (StringUtils.isEmpty(serviceId)) {
             throw new BizException("ServiceId can not be empty !");
         }
@@ -110,7 +110,7 @@ public class ServerDispatcher {
         return this;
     }
 
-    public ServerDispatcher addServiceObj(String serviceId, Object object) {
+    public ServiceDispatcher addServiceObj(String serviceId, Object object) {
         if (StringUtils.isEmpty(serviceId)) {
             throw new BizException("ServiceId can not be empty !");
         }

@@ -7,7 +7,7 @@ import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.exception.BizException;
 import com.wts.tsrpc.server.manage.Application;
-import com.wts.tsrpc.server.manage.ServerDispatcher;
+import com.wts.tsrpc.server.manage.ServiceDispatcher;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.server.service.ServiceMethod;
 import javassist.CannotCompileException;
@@ -41,18 +41,18 @@ public class ClassTool {
 
     private static final Object proxyObjectLock = new Object();
 
-    private ServerDispatcher serverDispatcher;
+    private ServiceDispatcher serviceDispatcher;
 
     private ClientDispatcher clientDispatcher;
 
-    public ClassTool manager(ServerDispatcher serverDispatcher, ClientDispatcher clientDispatcher) {
-        this.serverDispatcher = serverDispatcher;
+    public ClassTool manager(ServiceDispatcher serviceDispatcher, ClientDispatcher clientDispatcher) {
+        this.serviceDispatcher = serviceDispatcher;
         this.clientDispatcher = clientDispatcher;
         return this;
     }
 
-    public ClassTool serverDispatcher(ServerDispatcher serverDispatcher) {
-        this.serverDispatcher = serverDispatcher;
+    public ClassTool serverDispatcher(ServiceDispatcher serviceDispatcher) {
+        this.serviceDispatcher = serviceDispatcher;
         return this;
     }
 
@@ -118,7 +118,7 @@ public class ClassTool {
                         cc.addMethod(CtNewMethod.make(callMethodBody.toString(), cc));
 
                         Class<?> clazz = cc.toClass();
-                        ServiceWrapper proxyObject = (ServiceWrapper) clazz.getConstructor(serviceClazz).newInstance(serverDispatcher.getServiceObject(service.getServiceId()));
+                        ServiceWrapper proxyObject = (ServiceWrapper) clazz.getConstructor(serviceClazz).newInstance(serviceDispatcher.getServiceObject(service.getServiceId()));
                         proxyObjectMap.put(service.getServiceId(), proxyObject);
                         return proxyObject;
                     } catch (ClassNotFoundException e) {

@@ -2,7 +2,6 @@ package com.wts.tsrpc.common.utils;
 
 import com.wts.tsrpc.server.service.ParameterType;
 import com.wts.tsrpc.server.service.ServiceMethod;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -106,6 +105,11 @@ public class ReflectUtils {
         return Arrays.stream(methods).filter(method -> method.getModifiers() == Modifier.PUBLIC).toList();
     }
 
+    /**
+     * Get service method from a method
+     * @param method the method
+     * @return service method
+     */
     public static ServiceMethod getServiceMethod(Method method) {
         ServiceMethod serviceMethod = new ServiceMethod();
         serviceMethod.setMethodName(method.getName());
@@ -113,5 +117,15 @@ public class ReflectUtils {
         serviceMethod.setReturnType(method.getReturnType());
         serviceMethod.setParameterTypes(method.getGenericParameterTypes());
         return serviceMethod;
+    }
+
+    /**
+     * Get service methods from a class
+     * @param clazz the class
+     * @return service method list
+     */
+    public static List<ServiceMethod> getServiceMethods(Class<?> clazz) {
+        List<Method> methods = getPublicDeclaredMethods(clazz);
+        return methods.stream().map(ReflectUtils::getServiceMethod).toList();
     }
 }

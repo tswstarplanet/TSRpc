@@ -4,12 +4,12 @@ import com.wts.tsrpc.common.HttpUtils;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.common.ServiceResponseCode;
-import com.wts.tsrpc.common.transform.Transformers;
+import com.wts.tsrpc.common.Transformer;
 import com.wts.tsrpc.common.utils.Checker;
 import com.wts.tsrpc.common.utils.GsonUtils;
 import com.wts.tsrpc.common.utils.HttpContentType;
 import com.wts.tsrpc.common.utils.ResponseUtils;
-import com.wts.tsrpc.server.manage.ServerDispatcher;
+import com.wts.tsrpc.server.manage.ServiceDispatcher;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -33,21 +33,21 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     private static final Logger logger = LoggerFactory.getLogger(HttpServerHandler.class);
 
-    private Transformers transformers;
+    private Transformer transformer;
 
-    private ServerDispatcher serverDispatcher;
+    private ServiceDispatcher serviceDispatcher;
 
     public HttpServerHandler() {
 
     }
 
-    public HttpServerHandler transformers(Transformers transformers) {
-        this.transformers = transformers;
+    public HttpServerHandler transformer(Transformer transformer) {
+        this.transformer = transformer;
         return this;
     }
 
-    public HttpServerHandler serverDispatcher(ServerDispatcher serverDispatcher) {
-        this.serverDispatcher = serverDispatcher;
+    public HttpServerHandler serverDispatcher(ServiceDispatcher serviceDispatcher) {
+        this.serviceDispatcher = serviceDispatcher;
         return this;
     }
 
@@ -69,9 +69,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
 
             String body = HttpUtils.getBody(request);
 
-            ServiceRequest serviceRequest = transformers.getTransform(request.headers().get("transformType")).transformRequest(body);
+            ServiceRequest serviceRequest = transformer.transformRequest(body);
 
-            ServiceResponse serviceResponse = serverDispatcher.dispatch(serviceRequest);
+            ServiceResponse serviceResponse = serviceDispatcher.dispatch(serviceRequest);
 
             logger.info("channel = " + ctx.channel() + ", pipeline = " + ctx.pipeline() + ", channel of pipeline: " + ctx.pipeline().channel());
             logger.info("current handler = " + ctx.handler());

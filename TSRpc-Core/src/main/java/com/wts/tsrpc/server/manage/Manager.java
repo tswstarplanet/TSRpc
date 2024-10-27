@@ -8,7 +8,7 @@ import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.exception.BizException;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.server.service.ServiceMethod;
-import com.wts.tsrpc.server.service.Transformer;
+import com.wts.tsrpc.common.Transformer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
@@ -25,7 +25,7 @@ public class Manager {
 
     private String serviceInvoker;
 
-    private ServerDispatcher serverDispatcher;
+    private ServiceDispatcher serviceDispatcher;
 
     private final Map<String, Service> serviceMap = new ConcurrentHashMap<>();
 
@@ -60,10 +60,10 @@ public class Manager {
 
     }
 
-    public Manager(Application application, String serviceInvoker, ServerDispatcher serverDispatcher) {
+    public Manager(Application application, String serviceInvoker, ServiceDispatcher serviceDispatcher) {
         this.application = application;
         this.serviceInvoker = serviceInvoker;
-        this.serverDispatcher = serverDispatcher;
+        this.serviceDispatcher = serviceDispatcher;
     }
 
     public Manager application(Application application) {
@@ -71,8 +71,8 @@ public class Manager {
         return this;
     }
 
-    public ServerDispatcher getDispatcher() {
-        return serverDispatcher;
+    public ServiceDispatcher getDispatcher() {
+        return serviceDispatcher;
     }
 
     public Manager serviceInvoker(String serviceInvoker) {

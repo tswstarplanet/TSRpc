@@ -1,8 +1,6 @@
-package com.wts.tsrpc.server.service;
+package com.wts.tsrpc.common;
 
 import com.wts.tsrpc.client.service.ClientService;
-import com.wts.tsrpc.common.ServiceRequest;
-import com.wts.tsrpc.common.ServiceResponse;
 
 import java.lang.reflect.Type;
 

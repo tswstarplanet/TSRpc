@@ -1,6 +1,6 @@
 package com.wts.tsrpc.client;
 
-import com.wts.tsrpc.common.transform.Transformers;
+import com.wts.tsrpc.common.Transformer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -9,10 +9,10 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 
 public class HttpClientInitializer extends ChannelInitializer {
 
-    private Transformers transformers;
+    private Transformer transformer;
 
-    public HttpClientInitializer transformers(Transformers transformers) {
-        this.transformers = transformers;
+    public HttpClientInitializer transformers(Transformer transformers) {
+        this.transformer = transformers;
         return this;
     }
 
@@ -21,6 +21,6 @@ public class HttpClientInitializer extends ChannelInitializer {
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast("Http-Client-Encoder&Decoder", new HttpClientCodec())
                 .addLast("Http-Client-Aggregator", new HttpObjectAggregator(1024 * 1024))
-                .addLast("Http-Client-Handler", (new HttpClientHandler()).transformers(transformers));
+                .addLast("Http-Client-Handler", (new HttpClientHandler()).transformers(transformer));
     }
 }

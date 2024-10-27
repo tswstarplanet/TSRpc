@@ -16,7 +16,10 @@
 
 package com.wts.spring.boot.configuration;
 
+import com.wts.tsrpc.common.utils.ReflectUtils;
+import com.wts.tsrpc.server.manage.ServiceDispatcher;
 import com.wts.tsrpc.server.service.Service;
+import com.wts.tsrpc.server.service.ServiceMethod;
 import com.wts.tsrpc.spring.config.annotation.TSClient;
 import com.wts.tsrpc.spring.config.annotation.TSService;
 import com.wts.tsrpc.spring.utils.AnnotationUtils;
@@ -25,12 +28,16 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  *
  */
 @Component
+@DependsOn("serverDispatcher")
 public class TSRpcBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
@@ -50,9 +57,12 @@ public class TSRpcBeanPostProcessor implements BeanPostProcessor, ApplicationCon
             Service service = new Service();
             service.classFullName(bean.getClass().getName());
             service.serviceId(StringUtils.isEmpty(tsService.serviceId()) ? bean.getClass().getName() : tsService.serviceId());
-            if (tsService.exportAllPublicMethods()) {
+            List<ServiceMethod> serviceMethods = ReflectUtils.getServiceMethods(bean.getClass());
+            serviceMethods.forEach(service::method);
 
-            }
+            ServiceDispatcher serviceDispatcher = applicationContext.getBean("serviceDispatcher", ServiceDispatcher.class);
+            serviceDispatcher.addService(service.getServiceId(), service);
+
 //                    .classFullName("com.wts.tsrpc.test.server.ProviderService")
 //                    .serviceId("complexService")
 //                    .method(new ServiceMethod("complexService", new Class<?>[]{Request.class, String.class}))

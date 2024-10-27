@@ -6,7 +6,7 @@ import com.wts.tsrpc.client.service.ClientMethod;
 import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
-import com.wts.tsrpc.common.transform.Transformers;
+import com.wts.tsrpc.common.Transformer;
 import com.wts.tsrpc.server.manage.Application;
 
 import java.util.Arrays;
@@ -19,7 +19,7 @@ public class ClientInvoker {
 
     private ClientDispatcher clientDispatcher;
 
-    private Transformers transformers;
+    private Transformer transformer;
 
     public ClientInvoker clientService(ClientService clientService) {
         this.clientService = clientService;
@@ -42,14 +42,14 @@ public class ClientInvoker {
         var applicationInstance = loadBalancer.balance(new Application(applicationId, clientService.getApplicationVersion()));
         HttpClient httpClient = HttpClient.getHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()));
         if (httpClient == null) {
-            httpClient = HttpClient.addHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()), (new HttpClient(applicationInstance.getHost(), applicationInstance.getPort(), 10)).transformers(transformers).init());
+            httpClient = HttpClient.addHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()), (new HttpClient(applicationInstance.getHost(), applicationInstance.getPort(), 10)).transformer(transformer).init());
         }
         ClientInvokerFilterChain invokerFilterChain = new ClientInvokerFilterChain();
         invokerFilterChain.invokerFilters(clientDispatcher.getDefaultClientInvokerFilters())
-                .transformers(transformers)
+                .transformers(transformer)
                 .clientService(clientService)
                 .httpClient(httpClient);
-        ServiceRequest request = transformers.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
+        ServiceRequest request = transformer.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
         request.setMethodName(method.getClientMethodName());
         request.setArgTypeNames(Arrays.stream(method.getArgTypes()).map(Class::getName).toList().toArray(new String[0]));
 //        request.setArgTypeNames((String[]) Arrays.stream(method.getArgTypes()).map(Class::getName).toArray());
@@ -69,8 +69,8 @@ public class ClientInvoker {
 //        }
         ServiceResponse serviceResponse = HttpClientHandler.getServiceResponse(request.getRequestId());
         try {
-            String body = transformers.getTransform(clientService.getTransformType()).transformObjectToString(serviceResponse.getBody());
-            return transformers.getTransform(clientService.getTransformType()).transformReturnValueObject(body, method.getReturnGenericType());
+            String body = transformer.getTransform(clientService.getTransformType()).transformObjectToString(serviceResponse.getBody());
+            return transformer.getTransform(clientService.getTransformType()).transformReturnValueObject(body, method.getReturnGenericType());
         } finally {
             HttpClientHandler.removeServiceResponse(request.getRequestId());
         }

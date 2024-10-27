@@ -4,7 +4,7 @@ import com.wts.tsrpc.client.HttpClient;
 import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
-import com.wts.tsrpc.common.transform.Transformers;
+import com.wts.tsrpc.common.Transformer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
 
     private HttpClient httpClient;
 
-    private Transformers transformers;
+    private Transformer transformers;
 
     private List<ClientInvokerFilter> invokerFilters = new ArrayList<>();
 
@@ -66,7 +66,7 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
         return this;
     }
 
-    public Transformers getTransformers() {
+    public Transformer getTransformers() {
         return transformers;
     }
 
@@ -88,7 +88,7 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
         return this;
     }
 
-    public ClientInvokerFilterChain transformers(Transformers transformers) {
+    public ClientInvokerFilterChain transformers(Transformer transformers) {
         this.transformers = transformers;
         return this;
     }

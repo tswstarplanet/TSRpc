@@ -34,7 +34,7 @@ public class TSRpcInitializer implements SmartInitializingSingleton, Application
     }
 
     private void initServer() {
-        HttpServer httpServer = applicationContext.getBean("httpServer", HttpServer.class);
+        HttpServer httpServer = applicationContext.getBean("server", HttpServer.class);
         httpServer.start();
     }
 

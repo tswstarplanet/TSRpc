@@ -17,7 +17,7 @@
 package com.wts.tsrpc.common.transform;
 
 import com.wts.tsrpc.exception.BizException;
-import com.wts.tsrpc.server.service.Transformer;
+import com.wts.tsrpc.common.Transformer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;

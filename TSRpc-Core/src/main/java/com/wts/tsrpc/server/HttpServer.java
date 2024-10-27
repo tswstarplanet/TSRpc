@@ -11,7 +11,7 @@ import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpServer {
+public class HttpServer implements Server {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
 
@@ -61,7 +61,7 @@ public class HttpServer {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(serverInitializer);
             ChannelFuture future = bootstrap.bind(port).sync();
-            logger.info("Server start up on port: " + port);
+            logger.info("Server start up on port: {}", port);
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             logger.error("Server run error: ", e);

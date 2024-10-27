@@ -6,14 +6,14 @@ import com.wts.tsrpc.common.ServiceResponseCode;
 import com.wts.tsrpc.common.proxy.ClassTool;
 import com.wts.tsrpc.common.proxy.ServiceWrapper;
 import com.wts.tsrpc.exception.BizException;
-import com.wts.tsrpc.server.manage.ServerDispatcher;
+import com.wts.tsrpc.server.manage.ServiceDispatcher;
 import com.wts.tsrpc.server.service.Service;
 
 public class JavassistServiceInvoker implements ServiceInvoker {
 
     private ServiceWrapper wrapper;
 
-    public JavassistServiceInvoker(Service service, ServerDispatcher dispatcher) {
+    public JavassistServiceInvoker(Service service, ServiceDispatcher dispatcher) {
         ClassTool classTool = new ClassTool();
         classTool.serverDispatcher(dispatcher);
         this.wrapper = classTool.getOrCreateServerProxyObject(service);

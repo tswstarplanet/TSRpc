@@ -7,7 +7,7 @@ import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.common.utils.JacksonUtils;
 import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.common.utils.SerialNoUtils;
-import com.wts.tsrpc.server.manage.ServerDispatcher;
+import com.wts.tsrpc.server.manage.ServiceDispatcher;
 import com.wts.tsrpc.server.service.ServiceMethod;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -21,8 +21,8 @@ public class JacksonTransformer extends AbstractTransform {
 
     }
 
-    public JacksonTransformer(ServerDispatcher serverDispatcher, ClientDispatcher clientDispatcher) {
-        super(serverDispatcher, clientDispatcher);
+    public JacksonTransformer(ServiceDispatcher serviceDispatcher, ClientDispatcher clientDispatcher) {
+        super(serviceDispatcher, clientDispatcher);
     }
 
     @Override

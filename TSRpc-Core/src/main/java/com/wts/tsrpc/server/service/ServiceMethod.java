@@ -14,10 +14,19 @@ public class ServiceMethod {
      */
     private String methodName;
 
+    /**
+     * The types of service method arguments
+     */
     private Class<?>[] argTypes;
 
+    /**
+     * The generic types of service method parameters
+     */
     private Type[] parameterTypes;
 
+    /**
+     * The return type of service method
+     */
     private Class<?> returnType;
 
     public ServiceMethod() {

@@ -2,7 +2,7 @@ package com.wts.tsrpc.client;
 
 import com.wts.tsrpc.common.HttpUtils;
 import com.wts.tsrpc.common.ServiceResponse;
-import com.wts.tsrpc.common.transform.Transformers;
+import com.wts.tsrpc.common.Transformer;
 import com.wts.tsrpc.exception.BizException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpClientHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
-    private Transformers transformers;
+    private Transformer transformers;
 
     private static final Logger logger = LoggerFactory.getLogger(HttpClientHandler.class);
 
@@ -26,7 +26,7 @@ public class HttpClientHandler extends SimpleChannelInboundHandler<FullHttpRespo
 
     private static final Map<String, BlockingQueue<ServiceResponse>> serviceResponseMap = new ConcurrentHashMap<>();
 
-    public HttpClientHandler transformers(Transformers transformers) {
+    public HttpClientHandler transformers(Transformer transformers) {
         this.transformers = transformers;
         return this;
     }

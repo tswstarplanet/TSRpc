@@ -4,26 +4,26 @@ import com.wts.tsrpc.client.ClientDispatcher;
 import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
-import com.wts.tsrpc.server.manage.ServerDispatcher;
-import com.wts.tsrpc.server.service.Transformer;
+import com.wts.tsrpc.server.manage.ServiceDispatcher;
+import com.wts.tsrpc.common.Transformer;
 
 import java.lang.reflect.Type;
 
 public class AbstractTransform implements Transformer {
-    private ServerDispatcher serverDispatcher;
+    private ServiceDispatcher serviceDispatcher;
 
     private ClientDispatcher clientDispatcher;
 
     public AbstractTransform() {
     }
 
-    public AbstractTransform(ServerDispatcher serverDispatcher, ClientDispatcher clientDispatcher) {
-        this.serverDispatcher = serverDispatcher;
+    public AbstractTransform(ServiceDispatcher serviceDispatcher, ClientDispatcher clientDispatcher) {
+        this.serviceDispatcher = serviceDispatcher;
         this.clientDispatcher = clientDispatcher;
     }
 
-    public Transformer serverDispatcher(ServerDispatcher serverDispatcher) {
-        this.serverDispatcher = serverDispatcher;
+    public Transformer serverDispatcher(ServiceDispatcher serviceDispatcher) {
+        this.serviceDispatcher = serviceDispatcher;
         return this;
     }
 
@@ -62,8 +62,8 @@ public class AbstractTransform implements Transformer {
         return null;
     }
 
-    public ServerDispatcher getServerDispatcher() {
-        return serverDispatcher;
+    public ServiceDispatcher getServerDispatcher() {
+        return serviceDispatcher;
     }
 
     public ClientDispatcher getClientDispatcher() {
