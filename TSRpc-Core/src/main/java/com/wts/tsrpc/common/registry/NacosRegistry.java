@@ -9,30 +9,30 @@ import com.wts.tsrpc.client.Endpoint;
 import com.wts.tsrpc.common.utils.CollectionUtils;
 import com.wts.tsrpc.exception.BizException;
 import com.wts.tsrpc.server.manage.Application;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Properties;
 
 public class NacosRegistry extends AbstractRegistry implements Registry {
 
-    private final NamingService namingService;
+    private static final Logger log = LoggerFactory.getLogger(NacosRegistry.class);
+    private NamingService namingService = null;
+
+    private Properties properties = new Properties();
 
     public NacosRegistry(String serverList, String namespace) {
         super(serverList, namespace);
-        Properties properties = new Properties();
         properties.setProperty(PropertyKeyConst.NAMESPACE, namespace);
         properties.setProperty(PropertyKeyConst.SERVER_ADDR, serverList);
-        try {
-            this.namingService = NamingFactory.createNamingService(properties);
-        } catch (NacosException e) {
-            throw new BizException(STR."Create nacos naming service error: [\{e.getErrCode()} : \{e.getErrMsg()}]");
-        }
     }
 
     @Override
     public void register(Application application, Endpoint endpoint) {
         try {
             namingService.registerInstance(application.getKey(), endpoint.getHost(), endpoint.getPort());
+            log.info("Register application instance success");
         } catch (NacosException e) {
             throw new BizException(STR."Register application instance error: \{e.getErrCode()}, \{e.getErrMsg()}");
         }
@@ -65,6 +65,17 @@ public class NacosRegistry extends AbstractRegistry implements Registry {
             });
         } catch (NacosException e) {
             throw new BizException(STR."Subscribe application instance error: \{e.getErrCode()}, \{e.getErrMsg()}");
+        }
+    }
+
+    @Override
+    public void init() {
+        try {
+            this.namingService = NamingFactory.createNamingService(properties);
+            log.info("Create nacos naming service success");
+            log.info("Nacos registry init success");
+        } catch (NacosException e) {
+            throw new BizException(STR."Create nacos naming service error: [\{e.getErrCode()} : \{e.getErrMsg()}]");
         }
     }
 }

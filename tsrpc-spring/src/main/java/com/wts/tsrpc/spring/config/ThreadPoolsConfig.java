@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.wts.tsrpc.server;
+package com.wts.tsrpc.spring.config;
 
-import com.wts.tsrpc.common.Transformer;
-import com.wts.tsrpc.server.manage.ServiceDispatcher;
+import com.wts.tsrpc.common.concurrent.ThreadPools;
+import org.springframework.beans.factory.DisposableBean;
 
-public interface Server {
-    Server init(ServiceDispatcher serviceDispatcher, Transformer transformer);
+public class ThreadPoolsConfig implements DisposableBean {
 
-    void start();
+    @Override
+    public void destroy() throws Exception {
+        ThreadPools.getInstance().destroy();
+    }
 }

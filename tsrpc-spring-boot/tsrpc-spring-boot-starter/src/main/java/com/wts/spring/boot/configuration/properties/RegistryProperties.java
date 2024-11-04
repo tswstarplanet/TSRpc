@@ -26,6 +26,10 @@ public class RegistryProperties {
 
     private String name = "nacos";
 
+    private String serverList;
+
+    private String namespace;
+
     public boolean isEnable() {
         return enable;
     }
@@ -40,5 +44,21 @@ public class RegistryProperties {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getServerList() {
+        return serverList;
+    }
+
+    public void setServerList(String serverList) {
+        this.serverList = serverList;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 }

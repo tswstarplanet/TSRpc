@@ -49,7 +49,7 @@ public class ClientInvoker {
                 .transformers(transformer)
                 .clientService(clientService)
                 .httpClient(httpClient);
-        ServiceRequest request = transformer.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
+        ServiceRequest request = transformer.transformRequest(clientService, arguments);
         request.setMethodName(method.getClientMethodName());
         request.setArgTypeNames(Arrays.stream(method.getArgTypes()).map(Class::getName).toList().toArray(new String[0]));
 //        request.setArgTypeNames((String[]) Arrays.stream(method.getArgTypes()).map(Class::getName).toArray());
@@ -69,8 +69,8 @@ public class ClientInvoker {
 //        }
         ServiceResponse serviceResponse = HttpClientHandler.getServiceResponse(request.getRequestId());
         try {
-            String body = transformer.getTransform(clientService.getTransformType()).transformObjectToString(serviceResponse.getBody());
-            return transformer.getTransform(clientService.getTransformType()).transformReturnValueObject(body, method.getReturnGenericType());
+            String body = transformer.transformObjectToString(serviceResponse.getBody());
+            return transformer.transformReturnValueObject(body, method.getReturnGenericType());
         } finally {
             HttpClientHandler.removeServiceResponse(request.getRequestId());
         }

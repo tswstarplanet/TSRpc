@@ -29,7 +29,7 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
     public void doFilter(ServiceRequest serviceRequest, ClientInvokerFilterChain filterChain) {
         if (pos == invokerFilters.size()) {
 //            ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
-            String message = transformers.getTransform(clientService.getTransformType()).transformRequestToString(serviceRequest);
+            String message = transformers.transformRequestToString(serviceRequest);
             try {
                 httpClient.connect().await(30, TimeUnit.SECONDS);
 //            httpClient.connect().addListener(_ ->

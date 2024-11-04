@@ -29,15 +29,13 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  *
  */
-@Component
-@DependsOn("serverDispatcher")
+@DependsOn("serviceDispatcher")
 public class TSRpcBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
@@ -49,7 +47,7 @@ public class TSRpcBeanPostProcessor implements BeanPostProcessor, ApplicationCon
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (!AnnotationUtils.isAnnotatedWith(bean.getClass(), TSService.class) || !AnnotationUtils.isAnnotatedWith(bean.getClass(), TSClient.class)) {
+        if (!AnnotationUtils.isAnnotatedWith(bean.getClass(), TSService.class) && !AnnotationUtils.isAnnotatedWith(bean.getClass(), TSClient.class)) {
             return bean;
         }
         if (AnnotationUtils.isAnnotatedWith(bean.getClass(), TSService.class)) {
@@ -62,6 +60,7 @@ public class TSRpcBeanPostProcessor implements BeanPostProcessor, ApplicationCon
 
             ServiceDispatcher serviceDispatcher = applicationContext.getBean("serviceDispatcher", ServiceDispatcher.class);
             serviceDispatcher.addService(service.getServiceId(), service);
+            serviceDispatcher.addServiceObj(service.getServiceId(), bean);
 
 //                    .classFullName("com.wts.tsrpc.test.server.ProviderService")
 //                    .serviceId("complexService")

@@ -13,7 +13,7 @@ public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private Transformer transformer;
 
-    public HttpServerInitializer serverDispatcher(ServiceDispatcher serviceDispatcher) {
+    public HttpServerInitializer serviceDispatcher(ServiceDispatcher serviceDispatcher) {
         this.serviceDispatcher = serviceDispatcher;
         return this;
     }

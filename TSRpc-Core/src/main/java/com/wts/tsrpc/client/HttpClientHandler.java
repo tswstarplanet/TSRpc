@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpClientHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
-    private Transformer transformers;
+    private Transformer transformer;
 
     private static final Logger logger = LoggerFactory.getLogger(HttpClientHandler.class);
 
@@ -27,7 +27,7 @@ public class HttpClientHandler extends SimpleChannelInboundHandler<FullHttpRespo
     private static final Map<String, BlockingQueue<ServiceResponse>> serviceResponseMap = new ConcurrentHashMap<>();
 
     public HttpClientHandler transformers(Transformer transformers) {
-        this.transformers = transformers;
+        this.transformer = transformers;
         return this;
     }
 
@@ -37,7 +37,7 @@ public class HttpClientHandler extends SimpleChannelInboundHandler<FullHttpRespo
             throw new BizException("Http respond not succeed !");
         }
         String body = HttpUtils.getBody(msg);
-        ServiceResponse serviceResponse = transformers.getTransform(msg.headers().get("transformType")).transformResponse(body);
+        ServiceResponse serviceResponse = transformer.transformResponse(body);
         serviceResponseMap.putIfAbsent(serviceResponse.getRequestId(), new ArrayBlockingQueue<>(1));
         serviceResponseMap.get(serviceResponse.getRequestId()).put(serviceResponse);
     }

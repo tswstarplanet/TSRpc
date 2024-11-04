@@ -19,7 +19,6 @@ package com.wts.spring.boot.configuration;
 import com.wts.spring.boot.configuration.properties.ApplicationConfigurationProperties;
 import com.wts.spring.boot.configuration.properties.CommonProperties;
 import com.wts.spring.boot.configuration.properties.LoadBalancerProperties;
-import com.wts.spring.boot.configuration.properties.NacosRegistryProperties;
 import com.wts.spring.boot.configuration.properties.RegistryProperties;
 import com.wts.spring.boot.configuration.properties.ServerProperties;
 import com.wts.tsrpc.client.Endpoint;
@@ -32,16 +31,14 @@ import com.wts.tsrpc.common.transform.JacksonTransformer;
 import com.wts.tsrpc.common.utils.NetworkUtils;
 import com.wts.tsrpc.exception.SystemException;
 import com.wts.tsrpc.server.HttpServer;
-import com.wts.tsrpc.server.HttpServerInitializer;
 import com.wts.tsrpc.server.Server;
 import com.wts.tsrpc.server.filter.ServerInvokerFilter;
 import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.ServiceDispatcher;
-import org.apache.commons.lang3.StringUtils;
+import com.wts.tsrpc.spring.config.ThreadPoolsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -50,7 +47,7 @@ import java.lang.reflect.InvocationTargetException;
 
 @AutoConfiguration
 @EnableConfigurationProperties({ApplicationConfigurationProperties.class, ServerProperties.class, RegistryProperties.class,
-        NacosRegistryProperties.class, LoadBalancerProperties.class, CommonProperties.class})
+        LoadBalancerProperties.class, CommonProperties.class})
 public class TSRpcAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(TSRpcAutoConfiguration.class);
@@ -66,16 +63,11 @@ public class TSRpcAutoConfiguration {
     }
 
     @Bean
-    public ServiceDispatcher dispatcher(ServerProperties serverProperties) {
-        return new ServiceDispatcher(serverProperties.getServiceInvoker());
-    }
-
-    @Bean
-    public Transformer transformer(CommonProperties commonProperties) {
+    public Transformer transformer(CommonProperties commonProperties, ServiceDispatcher serviceDispatcher) {
         Transformer transformer = null;
         if ("jackson".equals(commonProperties.getTransformType())) {
-            transformer = new JacksonTransformer();
-        } // other transformer will be implemented in the future
+            transformer = new JacksonTransformer(serviceDispatcher, null);
+        } // todo other transformer will be implemented in the future
         return transformer;
     }
 
@@ -84,22 +76,22 @@ public class TSRpcAutoConfiguration {
         return new TSRpcBeanPostProcessor();
     }
 
-    @Bean
-    @ConditionalOnBean(Application.class)
-    @ConditionalOnProperty(prefix = "tsrpc.registry", name = "name", havingValue = "nacos")
-    public Registry registry(NacosRegistryProperties nacosRegistryProperties, ServerProperties serverProperties, Application application) {
-        if (StringUtils.isEmpty(nacosRegistryProperties.getServerList())) {
-            String errorMsg = "Nacos server list is null, please check the configuration";
-            logger.error(errorMsg);
-            throw new SystemException(errorMsg);
-        }
-        if (StringUtils.isEmpty(nacosRegistryProperties.getNamespace())) {
-            String errorMsg = "Nacos namespace is null, please check the configuration";
-            logger.error(errorMsg);
-            throw new SystemException(errorMsg);
-        }
-        return new NacosRegistry(nacosRegistryProperties.getServerList(), nacosRegistryProperties.getNamespace());
-    }
+//    @Bean
+//    @ConditionalOnBean(Application.class)
+//    @ConditionalOnProperty(prefix = "tsrpc.registry", name = "name", havingValue = "nacos")
+//    public Registry registry(RegistryProperties registryProperties) {
+//        if (StringUtils.isEmpty(registryProperties.getServerList())) {
+//            String errorMsg = "Nacos server list is null, please check the configuration";
+//            logger.error(errorMsg);
+//            throw new SystemException(errorMsg);
+//        }
+//        if (StringUtils.isEmpty(registryProperties.getNamespace())) {
+//            String errorMsg = "Nacos namespace is null, please check the configuration";
+//            logger.error(errorMsg);
+//            throw new SystemException(errorMsg);
+//        }
+//        return new NacosRegistry(registryProperties.getServerList(), registryProperties.getNamespace());
+//    }
 
     @Bean
     @ConditionalOnProperty(prefix = "tsrpc.loadbalancer", name = "type", havingValue = "random")
@@ -130,17 +122,42 @@ public class TSRpcAutoConfiguration {
                 }
             });
         }
+        return serviceDispatcher;
     }
 
     @Bean("server")
     public Server server(ServerProperties serverProperties, CommonProperties commonProperties, ServiceDispatcher serviceDispatcher, Transformer transformer) {
         Server server = null;
         if ("http".equals(commonProperties.getProtocol())) {
-            Server httpServer = new HttpServer(serverProperties.getPort(), serverProperties.getBossNum(), serverProperties.getWorkerNum());
-            HttpServerInitializer serverInitializer = (new HttpServerInitializer())
-                    .serverDispatcher(serviceDispatcher)
-                    .transformer(transformer);
-        } // other server will be implemented in the future
+            server = new HttpServer(serverProperties.getPort(), serverProperties.getBossNum(), serverProperties.getWorkerNum());
+            server.init(serviceDispatcher, transformer);
+        } // todo other server will be implemented in the future
         return server;
+    }
+
+    @Bean("registry")
+    public Registry registry(RegistryProperties registryProperties) {
+        Registry registry = null;
+        if (registryProperties.isEnable()) {
+            if ("nacos".equals(registryProperties.getName())) {
+                registry = new NacosRegistry(registryProperties.getServerList(), registryProperties.getNamespace());
+            } // todo other registry will be implemented in the future
+        }
+        return registry;
+    }
+
+    @Bean("threadPoolConfig")
+    public ThreadPoolsConfig threadPoolsConfig() {
+        return new ThreadPoolsConfig();
+    }
+
+    @Bean("TSRpcServerInitializer")
+    public TSRpcServerInitializer tsRpcInitializer() {
+        return new TSRpcServerInitializer();
+    }
+
+    @Bean("TSRpcRegistryInitializer")
+    public TSRpcRegistryInitializer tsRpcRegistryInitializer() {
+        return new TSRpcRegistryInitializer();
     }
 }

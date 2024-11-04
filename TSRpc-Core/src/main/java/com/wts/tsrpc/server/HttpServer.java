@@ -1,5 +1,7 @@
 package com.wts.tsrpc.server;
 
+import com.wts.tsrpc.common.Transformer;
+import com.wts.tsrpc.server.manage.ServiceDispatcher;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
@@ -46,8 +48,9 @@ public class HttpServer implements Server {
         return this;
     }
 
-    public HttpServer serverInitializer(ChannelHandler serverInitializer) {
-        this.serverInitializer = serverInitializer;
+    @Override
+    public Server init(ServiceDispatcher serviceDispatcher, Transformer transformer) {
+        this.serverInitializer = new HttpServerInitializer().serviceDispatcher(serviceDispatcher).transformer(transformer);
         return this;
     }
 

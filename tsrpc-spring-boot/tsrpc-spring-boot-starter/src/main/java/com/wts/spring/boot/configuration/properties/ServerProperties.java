@@ -18,6 +18,8 @@ package com.wts.spring.boot.configuration.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @ConfigurationProperties(prefix = "tsrpc.server")
@@ -35,9 +37,7 @@ public class ServerProperties {
 
     private String transformType;
 
-    private List<String> invokerFilters;
-
-    private List<String> transformers;
+    private List<String> invokerFilters = new ArrayList<>(Arrays.asList("com.wts.tsrpc.server.filter.LogServerInvokerFilter", "com.wts.tsrpc.server.filter.CheckServerInvokerFilter"));
 
     public String getProtocol() {
         return protocol;
@@ -93,13 +93,5 @@ public class ServerProperties {
 
     public void setInvokerFilters(List<String> invokerFilters) {
         this.invokerFilters = invokerFilters;
-    }
-
-    public List<String> getTransformers() {
-        return transformers;
-    }
-
-    public void setTransformers(List<String> transformers) {
-        this.transformers = transformers;
     }
 }

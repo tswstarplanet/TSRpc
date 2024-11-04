@@ -18,4 +18,8 @@ public interface Registry {
     default void subscribe(Application application) {}
 
     default List<ApplicationInstance> availableApplicationInstances(String applicationKey) { return Lists.newArrayList(); }
+
+    void init();
+
+    default void destroy() {}
 }

@@ -22,7 +22,7 @@ public class JavassistServiceInvoker implements ServiceInvoker {
 
 
     @Override
-    public void invoke(ServiceRequest request, ServiceResponse response) {
+    public void invoke(ServiceRequest request, ServiceResponse response, Service service) {
         Object returnValue = wrapper.callMethod(request.getMethodName(), getArgTypes(request.getArgTypeNames()), request.getParamValues());
         response.setCode(ServiceResponseCode.SUCCESS.getCode());
         response.setMsg(ServiceResponseCode.SUCCESS.getMsg());
