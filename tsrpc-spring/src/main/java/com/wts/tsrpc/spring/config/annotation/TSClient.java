@@ -16,5 +16,32 @@
 
 package com.wts.tsrpc.spring.config.annotation;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Client annotation
+ */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface TSClient {
+    /**
+     * Application ID of the service
+     * @return Application ID
+     */
+    String applicationId();
+
+    /**
+     * Application version of the service
+     * @return Application version
+     */
+    String applicationVersion();
+
+    /**
+     * Service ID of the service
+     * @return Service ID
+     */
+    String serviceId();
 }

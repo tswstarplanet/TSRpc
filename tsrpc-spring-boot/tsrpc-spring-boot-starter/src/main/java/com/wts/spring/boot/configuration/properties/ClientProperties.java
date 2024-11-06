@@ -18,8 +18,8 @@ package com.wts.spring.boot.configuration.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "tsrpc.loadbalancer")
-public class LoadBalancerProperties {
+@ConfigurationProperties(prefix = "tsrpc.client")
+public class ClientProperties {
 
     private String type = "random";
 

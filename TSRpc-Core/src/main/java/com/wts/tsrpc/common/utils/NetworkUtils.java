@@ -1,6 +1,6 @@
 package com.wts.tsrpc.common.utils;
 
-import com.wts.tsrpc.exception.SystemException;
+import com.wts.tsrpc.exception.PanicException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ public class NetworkUtils {
             return localHost.getHostAddress();
         } catch (UnknownHostException e) {
             logger.error("Get local host error", e);
-            throw new SystemException("Get local host error", e);
+            throw new PanicException("Get local host error", e);
         }
     }
 

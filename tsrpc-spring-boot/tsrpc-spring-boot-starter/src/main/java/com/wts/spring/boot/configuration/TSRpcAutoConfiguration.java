@@ -17,10 +17,11 @@
 package com.wts.spring.boot.configuration;
 
 import com.wts.spring.boot.configuration.properties.ApplicationConfigurationProperties;
+import com.wts.spring.boot.configuration.properties.ClientProperties;
 import com.wts.spring.boot.configuration.properties.CommonProperties;
-import com.wts.spring.boot.configuration.properties.LoadBalancerProperties;
 import com.wts.spring.boot.configuration.properties.RegistryProperties;
 import com.wts.spring.boot.configuration.properties.ServerProperties;
+import com.wts.tsrpc.client.ClientServiceStorage;
 import com.wts.tsrpc.client.Endpoint;
 import com.wts.tsrpc.client.loadbalance.LoadBalancer;
 import com.wts.tsrpc.client.loadbalance.RandomLoadBalancer;
@@ -29,7 +30,7 @@ import com.wts.tsrpc.common.registry.NacosRegistry;
 import com.wts.tsrpc.common.registry.Registry;
 import com.wts.tsrpc.common.transform.JacksonTransformer;
 import com.wts.tsrpc.common.utils.NetworkUtils;
-import com.wts.tsrpc.exception.SystemException;
+import com.wts.tsrpc.exception.PanicException;
 import com.wts.tsrpc.server.HttpServer;
 import com.wts.tsrpc.server.Server;
 import com.wts.tsrpc.server.filter.ServerInvokerFilter;
@@ -42,12 +43,13 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.DependsOn;
 
 import java.lang.reflect.InvocationTargetException;
 
 @AutoConfiguration
 @EnableConfigurationProperties({ApplicationConfigurationProperties.class, ServerProperties.class, RegistryProperties.class,
-        LoadBalancerProperties.class, CommonProperties.class})
+        ClientProperties.class, CommonProperties.class})
 public class TSRpcAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(TSRpcAutoConfiguration.class);
@@ -72,6 +74,7 @@ public class TSRpcAutoConfiguration {
     }
 
     @Bean
+    @DependsOn("serviceDispatcher")
     public TSRpcBeanPostProcessor tsRpcBeanPostProcessor() {
         return new TSRpcBeanPostProcessor();
     }
@@ -99,7 +102,7 @@ public class TSRpcAutoConfiguration {
         if (registry == null) {
             String errorMsg = "Registry is null, please check the configuration";
             logger.error(errorMsg);
-            throw new SystemException(errorMsg);
+            throw new PanicException(errorMsg);
         }
         return new RandomLoadBalancer(registry);
     }
@@ -118,7 +121,7 @@ public class TSRpcAutoConfiguration {
                     serviceDispatcher.addServiceInvokerFilter((ServerInvokerFilter) Class.forName(filter).getDeclaredConstructor().newInstance());
                 } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
                     logger.error("Add invoker filter error", e);
-                    throw new SystemException("Add invoker filter error", e);
+                    throw new PanicException("Add invoker filter error", e);
                 }
             });
         }
@@ -159,5 +162,19 @@ public class TSRpcAutoConfiguration {
     @Bean("TSRpcRegistryInitializer")
     public TSRpcRegistryInitializer tsRpcRegistryInitializer() {
         return new TSRpcRegistryInitializer();
+    }
+
+    @Bean("loadBalancer")
+    public LoadBalancer loadBalancer(ClientProperties clientProperties, Registry registry) {
+        LoadBalancer loadBalancer = null;
+        if ("random".equals(clientProperties.getType())) {
+            loadBalancer = new RandomLoadBalancer(registry);
+        } // Todo other loadBalancer will be implemented later
+        return loadBalancer;
+    }
+
+    @Bean("clientServiceStorage")
+    public ClientServiceStorage clientServiceStorage() {
+        return new ClientServiceStorage();
     }
 }

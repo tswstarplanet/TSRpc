@@ -38,8 +38,8 @@ public class ClientInvoker {
 
     public Object invoke(Object[] arguments, ClientMethod method) {
         method.settleGenericParamTypes();
-        String applicationId = clientService.getApplicationId();
-        var applicationInstance = loadBalancer.balance(new Application(applicationId, clientService.getApplicationVersion()));
+        String applicationId = clientService.getServiceApplicationId();
+        var applicationInstance = loadBalancer.balance(new Application(applicationId, clientService.getServiceApplicationVersion()));
         HttpClient httpClient = HttpClient.getHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()));
         if (httpClient == null) {
             httpClient = HttpClient.addHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()), (new HttpClient(applicationInstance.getHost(), applicationInstance.getPort(), 10)).transformer(transformer).init());
@@ -53,7 +53,7 @@ public class ClientInvoker {
         request.setMethodName(method.getClientMethodName());
         request.setArgTypeNames(Arrays.stream(method.getArgTypes()).map(Class::getName).toList().toArray(new String[0]));
 //        request.setArgTypeNames((String[]) Arrays.stream(method.getArgTypes()).map(Class::getName).toArray());
-        request.setApplicationId(clientService.getApplicationId());
+        request.setApplicationId(clientService.getServiceApplicationId());
         invokerFilterChain.doFilter(request, invokerFilterChain);
 //        ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
 //        String message = manager.getTransform(clientService.getTransformType()).transformRequestToString(request);

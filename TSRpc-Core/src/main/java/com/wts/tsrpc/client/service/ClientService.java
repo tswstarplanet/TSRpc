@@ -11,13 +11,13 @@ import java.util.Map;
 
 public class ClientService {
 
-    private String transformType;
+//    private String transformType;
 
     private String clientServiceId;
 
-    private String applicationId;
+    private String serviceApplicationId;
 
-    private String applicationVersion;
+    private String serviceApplicationVersion;
 
     private String serviceId;
 
@@ -41,13 +41,13 @@ public class ClientService {
         return clientMethodMap.get(signature).getReturnGenericType();
     }
 
-    public String getTransformType() {
-        return transformType;
-    }
-
-    public void setTransformType(String transformType) {
-        this.transformType = transformType;
-    }
+//    public String getTransformType() {
+//        return transformType;
+//    }
+//
+//    public void setTransformType(String transformType) {
+//        this.transformType = transformType;
+//    }
 
     public String getClientServiceId() {
         return clientServiceId;
@@ -57,20 +57,20 @@ public class ClientService {
         this.clientServiceId = clientServiceId;
     }
 
-    public String getApplicationId() {
-        return applicationId;
+    public String getServiceApplicationId() {
+        return serviceApplicationId;
     }
 
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
+    public void setServiceApplicationId(String serviceApplicationId) {
+        this.serviceApplicationId = serviceApplicationId;
     }
 
-    public String getApplicationVersion() {
-        return applicationVersion;
+    public String getServiceApplicationVersion() {
+        return serviceApplicationVersion;
     }
 
-    public void setApplicationVersion(String applicationVersion) {
-        this.applicationVersion = applicationVersion;
+    public void setServiceApplicationVersion(String serviceApplicationVersion) {
+        this.serviceApplicationVersion = serviceApplicationVersion;
     }
 
     public String getServiceId() {
@@ -103,5 +103,9 @@ public class ClientService {
 
     public void setClientMethodMap(Map<String, ClientMethod> clientMethodMap) {
         this.clientMethodMap = clientMethodMap;
+    }
+
+    public String getApplicationKey() {
+        return serviceApplicationId + ":" + serviceApplicationVersion;
     }
 }

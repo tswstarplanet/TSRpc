@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package com.wts.tsrpc.exception;
+package com.wts.tsrpc.spring;
 
-public class SystemException extends RuntimeException{
-    public SystemException(String message) {
-        super(message);
+import org.springframework.beans.factory.FactoryBean;
+
+public class TSClientProxyFactoryBean<T> implements FactoryBean<T> {
+
+    private Class<T> interfaceClass;
+
+    @Override
+    public T getObject() throws Exception {
+
+        return null;
     }
 
-    public SystemException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public Class<?> getObjectType() {
+        return null;
     }
 }

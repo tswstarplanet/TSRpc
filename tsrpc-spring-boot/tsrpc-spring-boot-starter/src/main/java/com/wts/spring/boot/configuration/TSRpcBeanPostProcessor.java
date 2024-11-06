@@ -16,6 +16,8 @@
 
 package com.wts.spring.boot.configuration;
 
+import com.wts.tsrpc.client.ClientServiceStorage;
+import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.server.manage.ServiceDispatcher;
 import com.wts.tsrpc.server.service.Service;
@@ -28,14 +30,13 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.DependsOn;
 
 import java.util.List;
 
 /**
  *
  */
-@DependsOn("serviceDispatcher")
+//@DependsOn("serviceDispatcher")
 public class TSRpcBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
@@ -69,7 +70,19 @@ public class TSRpcBeanPostProcessor implements BeanPostProcessor, ApplicationCon
 
         }
         if (AnnotationUtils.isAnnotatedWith(bean.getClass(), TSClient.class)) {
+            if (ReflectUtils.isInterface(bean.getClass())) {
+                return bean;
+            }
+            TSClient tsClient = AnnotationUtils.getAnnotationInfo(bean.getClass(), TSClient.class);
+            var clientService = new ClientService();
+            clientService.setServiceApplicationId(tsClient.applicationId());
+            clientService.setServiceApplicationVersion(tsClient.applicationVersion());
+            clientService.setClientServiceId(StringUtils.isEmpty(tsClient.serviceId()) ? bean.getClass().getName() : tsClient.serviceId());
+            clientService.setClientClassFullName(bean.getClass().getName());
+            clientService.setClientMethods(ReflectUtils.getClientMethods(bean.getClass()));
 
+            ClientServiceStorage clientServiceStorage = applicationContext.getBean("clientServiceStorage", ClientServiceStorage.class);
+            clientServiceStorage.addClientService(clientService.getApplicationKey(), clientService.getClientServiceId(), clientService);
         }
         return bean;
     }

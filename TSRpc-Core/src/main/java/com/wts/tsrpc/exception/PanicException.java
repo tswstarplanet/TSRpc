@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package com.wts.spring.boot.configuration;
+package com.wts.tsrpc.exception;
 
-import com.wts.spring.boot.configuration.properties.ApplicationConfigurationProperties;
-import com.wts.spring.boot.configuration.properties.ServerProperties;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+public class PanicException extends RuntimeException{
+    public PanicException(String message) {
+        super(message);
+    }
 
-@AutoConfiguration
-@EnableConfigurationProperties({ApplicationConfigurationProperties.class, ServerProperties.class})
-public class TSRpcBootConfiguration {
+    public PanicException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public PanicException(Throwable cause) {
+        super(cause);
+    }
 }

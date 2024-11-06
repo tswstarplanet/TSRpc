@@ -1,5 +1,6 @@
 package com.wts.tsrpc.common.utils;
 
+import com.wts.tsrpc.client.service.ClientMethod;
 import com.wts.tsrpc.server.service.ParameterType;
 import com.wts.tsrpc.server.service.ServiceMethod;
 
@@ -120,6 +121,19 @@ public class ReflectUtils {
     }
 
     /**
+     * Get client method from a method
+     * @param method the method
+     * @return client method
+     */
+    public static ClientMethod getClientMethod(Method method) {
+        ClientMethod clientMethod = new ClientMethod();
+        clientMethod.clientMethodName(method.getName());
+        clientMethod.argTypes(method.getParameterTypes());
+
+        return clientMethod;
+    }
+
+    /**
      * Get service methods from a class
      * @param clazz the class
      * @return service method list
@@ -127,5 +141,24 @@ public class ReflectUtils {
     public static List<ServiceMethod> getServiceMethods(Class<?> clazz) {
         List<Method> methods = getPublicDeclaredMethods(clazz);
         return methods.stream().map(ReflectUtils::getServiceMethod).toList();
+    }
+
+    /**
+     * Get client methods from a class
+     * @param clazz the class
+     * @return client method list
+     */
+    public static List<ClientMethod> getClientMethods(Class<?> clazz) {
+        List<Method> methods = getPublicDeclaredMethods(clazz);
+        return methods.stream().map(ReflectUtils::getClientMethod).toList();
+    }
+
+    /**
+     * Check if a class is an interface
+     * @param clazz the class
+     * @return true if the class is an interface
+     */
+    public static boolean isInterface(Class<?> clazz) {
+        return clazz.isInterface();
     }
 }
