@@ -16,6 +16,7 @@
 
 package com.wts.tsrpc.client;
 
+import com.wts.tsrpc.client.proxy.ClientServiceHandler;
 import com.wts.tsrpc.client.service.ClientMethod;
 import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.exception.PanicException;
@@ -25,11 +26,52 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientServiceStorage {
 
     private final Map<String, Map<String, ClientService>> clientServiceMap = new ConcurrentHashMap<>();
+
+    // applicationKey -> serviceId -> Class
+    private final Map<String, Map<String, Class<?>>> clientServiceClassMap = new ConcurrentHashMap<>();
+
+    // applicationKey -> serviceId -> ClientServiceHandler
+    private final Map<String, Map<String, ClientServiceHandler>> clientServiceHandlerMap = new ConcurrentHashMap<>();
+
+    // ClientService Class Set
+    private final Set<Class<?>> clientServiceClassSet = ConcurrentHashMap.newKeySet();
+
+    private static final ClientServiceStorage INSTANCE = new ClientServiceStorage();
+
+    public static ClientServiceStorage getInstance() {
+        return INSTANCE;
+    }
+
+    private ClientServiceStorage() {
+    }
+
+    public ClientServiceStorage addClientServiceHandler(String applicationKey, String serviceId, ClientServiceHandler clientServiceHandler) {
+        Map<String, ClientServiceHandler> tempServiceHandlerMap = clientServiceHandlerMap.computeIfAbsent(applicationKey, _ -> new ConcurrentHashMap<>());
+        if (tempServiceHandlerMap.containsKey(serviceId)) {
+            throw new PanicException(STR."Client Service Handler of serviceId [\{serviceId}] of [\{applicationKey}] has been existed !");
+        }
+        tempServiceHandlerMap.put(serviceId, clientServiceHandler);
+        return this;
+    }
+
+    public ClientServiceStorage addClientServiceClass(String applicationKey, String serviceId, Class<?> clientServiceClass) {
+        Map<String, Class<?>> tempServiceClassMap = clientServiceClassMap.computeIfAbsent(applicationKey, _ -> new ConcurrentHashMap<>());
+        if (tempServiceClassMap.containsKey(serviceId)) {
+            throw new PanicException(STR."Client Service Class of serviceId [\{serviceId}] of [\{applicationKey}] has been existed !");
+        }
+        tempServiceClassMap.put(serviceId, clientServiceClass);
+        if (!clientServiceClassSet.contains(clientServiceClass)) {
+            throw new PanicException(STR."Client Service Class of [\{clientServiceClass.getName()}] has been existed !");
+        }
+        clientServiceClassSet.add(clientServiceClass);
+        return this;
+    }
 
     public ClientServiceStorage addClientService(String applicationId, String serviceId, ClientService clientService) {
         if (StringUtils.isEmpty(applicationId)) {

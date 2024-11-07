@@ -18,16 +18,38 @@ package com.wts.spring.boot.configuration.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.List;
+
 @ConfigurationProperties(prefix = "tsrpc.client")
 public class ClientProperties {
 
-    private String type = "random";
+    private String balancerType = "random";
 
-    public String getType() {
-        return type;
+    private String basePackage;
+
+    private List<String> invokerFilters = List.of("com.wts.tsrpc.client.filter.LogClientInvokerFilter", "com.wts.tsrpc.client.filter.CheckClientInvokerFilter");
+
+    public String getBalancerType() {
+        return balancerType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setBalancerType(String balancerType) {
+        this.balancerType = balancerType;
+    }
+
+    public String getBasePackage() {
+        return basePackage;
+    }
+
+    public void setBasePackage(String basePackage) {
+        this.basePackage = basePackage;
+    }
+
+    public List<String> getInvokerFilters() {
+        return invokerFilters;
+    }
+
+    public void setInvokerFilters(List<String> invokerFilters) {
+        this.invokerFilters = invokerFilters;
     }
 }

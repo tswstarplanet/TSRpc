@@ -21,8 +21,9 @@ import com.wts.spring.boot.configuration.properties.ClientProperties;
 import com.wts.spring.boot.configuration.properties.CommonProperties;
 import com.wts.spring.boot.configuration.properties.RegistryProperties;
 import com.wts.spring.boot.configuration.properties.ServerProperties;
-import com.wts.tsrpc.client.ClientServiceStorage;
+import com.wts.tsrpc.client.ClientDispatcher;
 import com.wts.tsrpc.client.Endpoint;
+import com.wts.tsrpc.client.filter.ClientInvokerFilter;
 import com.wts.tsrpc.client.loadbalance.LoadBalancer;
 import com.wts.tsrpc.client.loadbalance.RandomLoadBalancer;
 import com.wts.tsrpc.common.Transformer;
@@ -128,6 +129,22 @@ public class TSRpcAutoConfiguration {
         return serviceDispatcher;
     }
 
+    @Bean("clientDispatcher")
+    public ClientDispatcher clientDispatcher(ClientProperties clientProperties) {
+        ClientDispatcher clientDispatcher = new ClientDispatcher();
+        if (clientProperties.getInvokerFilters() != null) {
+            clientProperties.getInvokerFilters().forEach(filter -> {
+                try {
+                    clientDispatcher.addClientInvokerFilter((ClientInvokerFilter) Class.forName(filter).getDeclaredConstructor().newInstance());
+                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+                    logger.error("Add invoker filter error", e);
+                    throw new PanicException("Add invoker filter error", e);
+                }
+            });
+        }
+        return clientDispatcher;
+    }
+
     @Bean("server")
     public Server server(ServerProperties serverProperties, CommonProperties commonProperties, ServiceDispatcher serviceDispatcher, Transformer transformer) {
         Server server = null;
@@ -167,14 +184,19 @@ public class TSRpcAutoConfiguration {
     @Bean("loadBalancer")
     public LoadBalancer loadBalancer(ClientProperties clientProperties, Registry registry) {
         LoadBalancer loadBalancer = null;
-        if ("random".equals(clientProperties.getType())) {
+        if ("random".equals(clientProperties.getBalancerType())) {
             loadBalancer = new RandomLoadBalancer(registry);
         } // Todo other loadBalancer will be implemented later
         return loadBalancer;
     }
 
-    @Bean("clientServiceStorage")
-    public ClientServiceStorage clientServiceStorage() {
-        return new ClientServiceStorage();
+//    @Bean("clientServiceStorage")
+//    public ClientServiceStorage clientServiceStorage() {
+//        return new ClientServiceStorage();
+//    }
+
+    @Bean("tsClientBeanDefinitionRegistryPostProcessor")
+    public TSClientBeanDefinitionRegistryPostProcessor tsClientBeanDefinitionRegistryPostProcessor(ClientProperties clientProperties) {
+        return new TSClientBeanDefinitionRegistryPostProcessor(clientProperties.getBasePackage());
     }
 }
