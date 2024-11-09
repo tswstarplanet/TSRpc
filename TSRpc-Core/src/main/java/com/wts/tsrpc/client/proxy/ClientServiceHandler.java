@@ -16,6 +16,7 @@
 
 package com.wts.tsrpc.client.proxy;
 
+import com.wts.tsrpc.client.service.ClientService;
 import org.slf4j.Logger;
 
 import java.lang.reflect.InvocationHandler;
@@ -29,11 +30,18 @@ public class ClientServiceHandler implements InvocationHandler {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ClientServiceHandler.class);
 
+    private Class<?> interfaceType;
+
     /**
-     * Client service object
+     * Client service
+     */
+    private ClientService clientService;
+
+    /**
+     * Client service target object
      * First is null, then will be set the actually proxy object of service
      */
-    private Object clientService;
+    private Object target;
 
     public ClientServiceHandler() {
     }
@@ -41,16 +49,32 @@ public class ClientServiceHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         LOGGER.debug("Before call client service method, service: {}, method: {}", proxy.getClass().getName(), method.getName());
-        Object result = method.invoke(clientService, args);
+        Object result = method.invoke(target, args);
         LOGGER.debug("After call client service method, service: {}, method: {}", proxy.getClass().getName(), method.getName());
         return result;
     }
 
-    public Object getClientService() {
+    public Class<?> getInterfaceType() {
+        return interfaceType;
+    }
+
+    public void setInterfaceType(Class<?> interfaceType) {
+        this.interfaceType = interfaceType;
+    }
+
+    public ClientService getClientService() {
         return clientService;
     }
 
-    public void setClientService(Object clientService) {
+    public void setClientService(ClientService clientService) {
         this.clientService = clientService;
+    }
+
+    public Object getTarget() {
+        return target;
+    }
+
+    public void setTarget(Object target) {
+        this.target = target;
     }
 }

@@ -60,7 +60,7 @@ public class Main {
                 .addClientInvokerFilter(new CheckClientInvokerFilter());
 
         ClassTool classTool = new ClassTool();
-        classTool.manager(manager);
+//        classTool.manager(manager);
         IProviderService iProviderService = (IProviderService) classTool
                 .getOrCreateClientServiceProxy(IProviderService.class, IProviderService.class.getDeclaredMethods(), application, clientService);
 

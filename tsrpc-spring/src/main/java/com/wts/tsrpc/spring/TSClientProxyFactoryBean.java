@@ -18,27 +18,47 @@ package com.wts.tsrpc.spring;
 
 import com.wts.tsrpc.client.ClientServiceStorage;
 import com.wts.tsrpc.client.proxy.ClientServiceHandler;
+import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.client.utils.NameUtils;
+import com.wts.tsrpc.common.utils.ReflectUtils;
 import org.springframework.beans.factory.FactoryBean;
 
 import java.lang.reflect.Proxy;
 
 public class TSClientProxyFactoryBean<T> implements FactoryBean<T> {
 
+    /**
+     * Interface type
+     */
     private Class<T> interfaceType;
 
+    /**
+     * Application id
+     */
     private String applicationId;
 
+    /**
+     * Application version
+     */
     private String applicationVersion;
 
+    /**
+     * Service id
+     */
     private String serviceId;
 
     @Override
     public T getObject() throws Exception {
-
         ClientServiceHandler clientServiceHandler = new ClientServiceHandler();
+        clientServiceHandler.setInterfaceType(interfaceType);
+        ClientService clientService = new ClientService();
+        clientService.setServiceApplicationId(applicationId);
+        clientService.setServiceApplicationVersion(applicationVersion);
+        clientService.setServiceId(serviceId);
+        clientService.setClientClassFullName(interfaceType.getName());
+        clientService.setClientMethods(ReflectUtils.getClientMethods(interfaceType));
         ClientServiceStorage.getInstance().addClientServiceClass(NameUtils.applicationKey(applicationId, applicationVersion), serviceId, interfaceType)
-                .addClientServiceHandler(NameUtils.applicationKey(applicationId, applicationVersion), serviceId, clientServiceHandler);
+                .addClientServiceHandler(NameUtils.serviceBeanName(applicationId, applicationVersion, serviceId), clientServiceHandler);
         return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, clientServiceHandler);
     }
 

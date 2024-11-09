@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +38,9 @@ public class ClientServiceStorage {
     private final Map<String, Map<String, Class<?>>> clientServiceClassMap = new ConcurrentHashMap<>();
 
     // applicationKey -> serviceId -> ClientServiceHandler
-    private final Map<String, Map<String, ClientServiceHandler>> clientServiceHandlerMap = new ConcurrentHashMap<>();
+//    private final Map<String, Map<String, ClientServiceHandler>> clientServiceHandlerMap = new ConcurrentHashMap<>();
+
+    private final Map<String, ClientServiceHandler> clientServiceHandlerMap = new ConcurrentHashMap<>();
 
     // ClientService Class Set
     private final Set<Class<?>> clientServiceClassSet = ConcurrentHashMap.newKeySet();
@@ -51,14 +54,22 @@ public class ClientServiceStorage {
     private ClientServiceStorage() {
     }
 
-    public ClientServiceStorage addClientServiceHandler(String applicationKey, String serviceId, ClientServiceHandler clientServiceHandler) {
-        Map<String, ClientServiceHandler> tempServiceHandlerMap = clientServiceHandlerMap.computeIfAbsent(applicationKey, _ -> new ConcurrentHashMap<>());
-        if (tempServiceHandlerMap.containsKey(serviceId)) {
-            throw new PanicException(STR."Client Service Handler of serviceId [\{serviceId}] of [\{applicationKey}] has been existed !");
+    public ClientServiceStorage addClientServiceHandler(String serviceKey, ClientServiceHandler clientServiceHandler) {
+        if (clientServiceHandlerMap.containsKey(serviceKey)) {
+            throw new PanicException(STR."Client Service Handler of serviceKey [\{serviceKey}] has been existed !");
         }
-        tempServiceHandlerMap.put(serviceId, clientServiceHandler);
+        clientServiceHandlerMap.put(serviceKey, clientServiceHandler);
         return this;
     }
+
+//    public ClientServiceStorage addClientServiceHandler(String applicationKey, String serviceId, ClientServiceHandler clientServiceHandler) {
+//        Map<String, ClientServiceHandler> tempServiceHandlerMap = clientServiceHandlerMap.computeIfAbsent(applicationKey, _ -> new ConcurrentHashMap<>());
+//        if (tempServiceHandlerMap.containsKey(serviceId)) {
+//            throw new PanicException(STR."Client Service Handler of serviceId [\{serviceId}] of [\{applicationKey}] has been existed !");
+//        }
+//        tempServiceHandlerMap.put(serviceId, clientServiceHandler);
+//        return this;
+//    }
 
     public ClientServiceStorage addClientServiceClass(String applicationKey, String serviceId, Class<?> clientServiceClass) {
         Map<String, Class<?>> tempServiceClassMap = clientServiceClassMap.computeIfAbsent(applicationKey, _ -> new ConcurrentHashMap<>());
@@ -106,4 +117,7 @@ public class ClientServiceStorage {
         }
     }
 
+    public Map<String, ClientServiceHandler> getClientServiceHandlerMap(String applicationId) {
+        return Collections.unmodifiableMap(clientServiceHandlerMap);
+    }
 }
