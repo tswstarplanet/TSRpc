@@ -6,6 +6,7 @@ import com.wts.tsrpc.client.service.ClientMethod;
 import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.exception.BizException;
+import com.wts.tsrpc.exception.PanicException;
 import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.ServiceDispatcher;
 import com.wts.tsrpc.server.service.Service;
@@ -122,12 +123,12 @@ public class ClassTool {
                         return proxyObject;
                     } catch (ClassNotFoundException e) {
                         logger.error(STR."Class of service \{service.getClassFullName()} not found !");
-                        throw new BizException(STR."Class of service \{service.getClassFullName()} not found !");
+                        throw new PanicException(STR."Class of service \{service.getClassFullName()} not found !");
                     } catch (NotFoundException e) {
-                        throw new BizException(STR."The CtClass [\{service.getClassFullName()} can not be found !");
+                        throw new PanicException(STR."The CtClass [\{service.getClassFullName()} can not be found !");
                     } catch (Exception e) {
                         logger.error("error: ", e);
-                        throw new BizException(STR."Construct a client service proxy object error: \{e.getMessage()}");
+                        throw new PanicException(STR."Construct a client service proxy object error: \{e.getMessage()}");
                     }
                 }
             }
@@ -220,12 +221,12 @@ public class ClassTool {
             return clazz.getConstructor(ClientInvoker.class).newInstance(clientDispatcher.getClientInvoker(application.getKey(), clientService.getServiceId()));
         } catch (CannotCompileException e) {
             logger.error("error: ", e);
-            throw new BizException(STR."The class [\{clientServiceClazz.getName()} can not be compiled !");
+            throw new PanicException(STR."The class [\{clientServiceClazz.getName()} can not be compiled !");
         } catch (NotFoundException e) {
-            throw new BizException(STR."The class [\{clientServiceClazz.getName()} can not be found !");
+            throw new PanicException(STR."The class [\{clientServiceClazz.getName()} can not be found !");
         } catch (Exception e) {
             logger.error("error: ", e);
-            throw new BizException(STR."Construct a client service proxy object error: \{e.getMessage()}");
+            throw new PanicException(STR."Construct a client service proxy object error: \{e.getMessage()}");
         }
     }
 

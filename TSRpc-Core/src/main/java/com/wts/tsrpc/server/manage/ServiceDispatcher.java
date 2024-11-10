@@ -57,6 +57,7 @@ public class ServiceDispatcher {
         ServiceInvoker invoker;
 
         switch (getServiceInvoker()) {
+            // todo avoid create new instance every time
             case "reflect" -> invoker = new ReflectServiceInvoker(service, getServiceObject(request.getServiceId()));
             case "javassist" -> invoker = new JavassistServiceInvoker(service, this);
             default -> invoker = new ReflectServiceInvoker(service, getServiceObject(request.getServiceId()));
