@@ -2,6 +2,7 @@ package com.wts.tsrpc.client.service;
 
 import com.wts.tsrpc.common.utils.CollectionUtils;
 import com.wts.tsrpc.common.utils.ReflectUtils;
+import com.wts.tsrpc.server.manage.Application;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -15,9 +16,11 @@ public class ClientService {
 
     private String clientServiceId;
 
-    private String serviceApplicationId;
+//    private String serviceApplicationId;
+//
+//    private String serviceApplicationVersion;
 
-    private String serviceApplicationVersion;
+    private Application serviceApplication;
 
     private String serviceId;
 
@@ -26,6 +29,8 @@ public class ClientService {
     private List<ClientMethod> clientMethods = new ArrayList<>();
 
     private Map<String, ClientMethod> clientMethodMap = new HashMap<>();
+
+    private Long timeout;
 
     public ClientService settleClientMethod() {
         if (CollectionUtils.isEmpty(clientMethods)) {
@@ -57,20 +62,28 @@ public class ClientService {
         this.clientServiceId = clientServiceId;
     }
 
-    public String getServiceApplicationId() {
-        return serviceApplicationId;
+//    public String getServiceApplicationId() {
+//        return serviceApplicationId;
+//    }
+//
+//    public void setServiceApplicationId(String serviceApplicationId) {
+//        this.serviceApplicationId = serviceApplicationId;
+//    }
+//
+//    public String getServiceApplicationVersion() {
+//        return serviceApplicationVersion;
+//    }
+//
+//    public void setServiceApplicationVersion(String serviceApplicationVersion) {
+//        this.serviceApplicationVersion = serviceApplicationVersion;
+//    }
+
+    public Application getServiceApplication() {
+        return serviceApplication;
     }
 
-    public void setServiceApplicationId(String serviceApplicationId) {
-        this.serviceApplicationId = serviceApplicationId;
-    }
-
-    public String getServiceApplicationVersion() {
-        return serviceApplicationVersion;
-    }
-
-    public void setServiceApplicationVersion(String serviceApplicationVersion) {
-        this.serviceApplicationVersion = serviceApplicationVersion;
+    public void setServiceApplication(Application serviceApplication) {
+        this.serviceApplication = serviceApplication;
     }
 
     public String getServiceId() {
@@ -105,7 +118,15 @@ public class ClientService {
         this.clientMethodMap = clientMethodMap;
     }
 
-    public String getApplicationKey() {
-        return serviceApplicationId + ":" + serviceApplicationVersion;
+    public Long getTimeout() {
+        return timeout;
     }
+
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
+    }
+
+    //    public String getApplicationKey() {
+//        return serviceApplicationId + ":" + serviceApplicationVersion;
+//    }
 }

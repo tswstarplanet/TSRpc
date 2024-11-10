@@ -22,11 +22,13 @@ import com.wts.spring.boot.configuration.properties.CommonProperties;
 import com.wts.spring.boot.configuration.properties.RegistryProperties;
 import com.wts.spring.boot.configuration.properties.ServerProperties;
 import com.wts.tsrpc.client.ClientDispatcher;
+import com.wts.tsrpc.client.ClientEnd;
 import com.wts.tsrpc.client.Endpoint;
 import com.wts.tsrpc.client.filter.ClientInvokerFilter;
 import com.wts.tsrpc.client.loadbalance.LoadBalancer;
 import com.wts.tsrpc.client.loadbalance.RandomLoadBalancer;
 import com.wts.tsrpc.common.Transformer;
+import com.wts.tsrpc.client.concurrent.ClientThreadPool;
 import com.wts.tsrpc.common.registry.NacosRegistry;
 import com.wts.tsrpc.common.registry.Registry;
 import com.wts.tsrpc.common.transform.JacksonTransformer;
@@ -198,5 +200,15 @@ public class TSRpcAutoConfiguration {
     @Bean("tsClientBeanDefinitionRegistryPostProcessor")
     public TSClientBeanDefinitionRegistryPostProcessor tsClientBeanDefinitionRegistryPostProcessor(ClientProperties clientProperties) {
         return new TSClientBeanDefinitionRegistryPostProcessor(clientProperties.getBasePackage());
+    }
+
+    @Bean("clientThreadPool")
+    public ClientThreadPool clientThreadPool(ClientProperties clientProperties) {
+        return new ClientThreadPool(clientProperties.getThreadPool().getCorePoolSize(), clientProperties.getThreadPool().getMaximumPoolSize(), clientProperties.getThreadPool().getQueueSize());
+    }
+
+    @Bean("clientEnd")
+    public ClientEnd clientEnd(ClientProperties clientProperties) {
+        return new ClientEnd(clientProperties.getTimeout());
     }
 }

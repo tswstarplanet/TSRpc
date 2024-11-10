@@ -1,11 +1,13 @@
 package com.wts.tsrpc.server.manage;
 
+import java.util.Objects;
+
 public class Application {
     private String applicationId;
 
     private String version;
 
-    private static final Application application = new Application();
+//    private static final Application application = new Application();
 
     public Application() {
 
@@ -16,9 +18,9 @@ public class Application {
         this.version = version;
     }
 
-    public static Application getApplication() {
-        return application;
-    }
+//    public static Application getApplication() {
+//        return application;
+//    }
 
     public Application applicationId(String name) {
         this.applicationId = name;
@@ -40,5 +42,18 @@ public class Application {
 
     public String getKey() {
         return STR."\{applicationId}:\{version}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Application that = (Application) o;
+        return Objects.equals(applicationId, that.applicationId) && Objects.equals(version, that.version);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(applicationId, version);
     }
 }

@@ -1,5 +1,7 @@
 package com.wts.tsrpc.common.registry;
 
+import com.wts.tsrpc.server.manage.Application;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,7 +11,11 @@ public abstract class AbstractRegistry implements Registry {
 
     private String namespace;
 
+    private Map<Application, Boolean> subscribedApplications = new ConcurrentHashMap<>();
+
     private Map<String, List<ApplicationInstance>> instanceMap;
+
+    private Object lock = new Object();
 
     public AbstractRegistry(String serverList, String namespace) {
         this.serverList = serverList;
@@ -44,5 +50,17 @@ public abstract class AbstractRegistry implements Registry {
 
     public void setInstanceMap(Map<String, List<ApplicationInstance>> instanceMap) {
         this.instanceMap = instanceMap;
+    }
+
+    protected boolean checkApplicationSubscribed(Application application) {
+        return subscribedApplications.get(application);
+    }
+
+    public Object getLock() {
+        return lock;
+    }
+
+    protected void setApplicationSubscribed(Application application) {
+        subscribedApplications.put(application, Boolean.TRUE);
     }
 }

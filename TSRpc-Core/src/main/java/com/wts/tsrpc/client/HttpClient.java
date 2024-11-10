@@ -1,5 +1,7 @@
 package com.wts.tsrpc.client;
 
+import com.wts.tsrpc.common.ServiceRequest;
+import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.common.Transformer;
 import com.wts.tsrpc.exception.BizException;
 import io.netty.bootstrap.Bootstrap;
@@ -21,9 +23,10 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HttpClient {
+public class HttpClient implements Client{
     private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
     private static final Map<Endpoint, HttpClient> httpClientMap = new ConcurrentHashMap<>();
@@ -71,7 +74,34 @@ public class HttpClient {
         return this;
     }
 
-    public ChannelFuture sendMsg(String msg) {
+    public ChannelFuture sendRequest(ServiceRequest serviceRequest, CompletableFuture<ServiceResponse> completableFuture) {
+
+//        ClientInvokerResponseCache.getInstance().
+        ClientInvokerResponseCache.getInstance().put(serviceRequest.getRequestId(), completableFuture);
+
+        String msg = transformer.transformRequestToString(serviceRequest);
+
+        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, STR."http://\{host}:\{port}"
+                , Unpooled.wrappedBuffer(msg.getBytes(StandardCharsets.UTF_8)));
+        request.headers().set(HttpHeaderNames.HOST, host)
+                .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE)
+                .set(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes())
+                .set("transformType", "jackson");
+        channelFuture.channel().write(request);
+        channelFuture.channel().flush();
+//        try {
+//            return channelFuture.channel().closeFuture().sync();
+        return channelFuture.channel().closeFuture();
+//        }
+//        catch (InterruptedException e) {
+//            throw new BizException(STR."Send msg error: \{e.getMessage()}");
+//        }
+    }
+
+    public ChannelFuture sendMsg(String msg, CompletableFuture<ServiceResponse> completableFuture) {
+
+//        ClientInvokerResponseCache.getInstance().
+
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, STR."http://\{host}:\{port}"
                 , Unpooled.wrappedBuffer(msg.getBytes(StandardCharsets.UTF_8)));
         request.headers().set(HttpHeaderNames.HOST, host)

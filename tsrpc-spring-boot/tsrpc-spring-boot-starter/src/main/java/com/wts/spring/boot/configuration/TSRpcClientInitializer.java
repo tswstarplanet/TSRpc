@@ -17,8 +17,13 @@
 package com.wts.spring.boot.configuration;
 
 import com.wts.tsrpc.client.ClientDispatcher;
+import com.wts.tsrpc.client.ClientEnd;
+import com.wts.tsrpc.client.ClientInvoker;
+import com.wts.tsrpc.client.concurrent.ClientThreadPool;
+import com.wts.tsrpc.client.loadbalance.LoadBalancer;
 import com.wts.tsrpc.client.proxy.ClientServiceHandler;
 import com.wts.tsrpc.common.proxy.ClassTool;
+import com.wts.tsrpc.common.registry.Registry;
 import com.wts.tsrpc.server.manage.Application;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -50,6 +55,19 @@ public class TSRpcClientInitializer implements SmartInitializingSingleton, Appli
             classTool.clientDispatcher(applicationContext.getBean("clientDispatcher", ClientDispatcher.class));
             Object target = classTool.getOrCreateClientServiceProxy(interfaceType, interfaceType.getDeclaredMethods(), application, clientServiceHandler.getClientService());
             clientServiceHandler.setTarget(target);
+
+            ClientInvoker clientInvoker = new ClientInvoker();
+            ClientEnd clientEnd = applicationContext.getBean(ClientEnd.class);
+            clientServiceHandler.getClientService().setTimeout(clientEnd.getTimeout());
+            clientInvoker.clientService(clientServiceHandler.getClientService())
+                    .loadBalancer(applicationContext.getBean("loadBalancer", LoadBalancer.class))
+                    .clientDispatcher(applicationContext.getBean("clientDispatcher", ClientDispatcher.class))
+                    .executorService(applicationContext.getBean("clientThreadPool", ClientThreadPool.class).getExecutorService());
+            ClientDispatcher clientDispatcher = applicationContext.getBean("clientDispatcher", ClientDispatcher.class);
+            clientDispatcher.addClientInvoker(application.getKey(), clientServiceHandler.getClientService().getServiceId(), clientInvoker);
+
+            Registry registry = applicationContext.getBean(Registry.class);
+            registry.subscribe(clientServiceHandler.getClientService().getServiceApplication());
         });
     }
 }

@@ -18,6 +18,7 @@ import java.util.Properties;
 public class NacosRegistry extends AbstractRegistry implements Registry {
 
     private static final Logger log = LoggerFactory.getLogger(NacosRegistry.class);
+
     private NamingService namingService = null;
 
     private Properties properties = new Properties();
@@ -49,22 +50,30 @@ public class NacosRegistry extends AbstractRegistry implements Registry {
 
     @Override
     public void subscribe(Application application) {
-        try {
-            namingService.subscribe(application.getKey(), event -> {
-                if (event instanceof NamingEvent) {
-                    if (CollectionUtils.isEmpty(((NamingEvent) event).getInstances())) {
-                        super.getInstanceMap().get(((NamingEvent) event).getServiceName()).clear();
-                    } else {
-                        List<ApplicationInstance> applicationInstances = ((NamingEvent) event).getInstances().stream().map(instance -> {
-                            String[] keyArray = instance.getServiceName().split(":");
-                            return new ApplicationInstance(keyArray[0], keyArray[1], instance.getIp(), instance.getPort());
-                        }).toList();
-                        super.getInstanceMap().put(((NamingEvent) event).getServiceName(), applicationInstances);
+        if (!checkApplicationSubscribed(application)) {
+            synchronized (getLock()) {
+                if (!checkApplicationSubscribed(application)) {
+                    try {
+                        namingService.subscribe(application.getKey(), event -> {
+                            if (event instanceof NamingEvent) {
+                                if (CollectionUtils.isEmpty(((NamingEvent) event).getInstances())) {
+                                    super.getInstanceMap().get(((NamingEvent) event).getServiceName()).clear();
+                                } else {
+                                    List<ApplicationInstance> applicationInstances = ((NamingEvent) event).getInstances().stream().map(instance -> {
+                                        String[] keyArray = instance.getServiceName().split(":");
+                                        return new ApplicationInstance(keyArray[0], keyArray[1], instance.getIp(), instance.getPort());
+                                    }).toList();
+                                    super.getInstanceMap().put(((NamingEvent) event).getServiceName(), applicationInstances);
+                                }
+                            }
+                        });
+                        setApplicationSubscribed(application);
+                    } catch (NacosException e) {
+                        throw new BizException(STR."Subscribe application instance error: \{e.getErrCode()}, \{e.getErrMsg()}");
                     }
                 }
-            });
-        } catch (NacosException e) {
-            throw new BizException(STR."Subscribe application instance error: \{e.getErrCode()}, \{e.getErrMsg()}");
+
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package com.wts.tsrpc.client;
 
+import com.wts.tsrpc.client.concurrent.ClientCallTask;
 import com.wts.tsrpc.client.filter.ClientInvokerFilterChain;
 import com.wts.tsrpc.client.loadbalance.LoadBalancer;
 import com.wts.tsrpc.client.service.ClientMethod;
@@ -7,9 +8,12 @@ import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.common.Transformer;
-import com.wts.tsrpc.server.manage.Application;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 public class ClientInvoker {
 
@@ -19,7 +23,11 @@ public class ClientInvoker {
 
     private ClientDispatcher clientDispatcher;
 
+    private ExecutorService executorService;
+
     private Transformer transformer;
+
+//    private Map<String, CompletableFuture<ServiceResponse>> pendingResponseMap = new ConcurrentHashMap<>();
 
     public ClientInvoker clientService(ClientService clientService) {
         this.clientService = clientService;
@@ -36,10 +44,15 @@ public class ClientInvoker {
         return this;
     }
 
+    public ClientInvoker executorService(ExecutorService executorService) {
+        this.executorService = executorService;
+        return this;
+    }
+
     public Object invoke(Object[] arguments, ClientMethod method) {
         method.settleGenericParamTypes();
-        String applicationId = clientService.getServiceApplicationId();
-        var applicationInstance = loadBalancer.balance(new Application(applicationId, clientService.getServiceApplicationVersion()));
+//        String applicationId = clientService.getServiceApplicationId();
+        var applicationInstance = loadBalancer.balance(clientService.getServiceApplication());
         HttpClient httpClient = HttpClient.getHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()));
         if (httpClient == null) {
             httpClient = HttpClient.addHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()), (new HttpClient(applicationInstance.getHost(), applicationInstance.getPort(), 10)).transformer(transformer).init());
@@ -53,8 +66,11 @@ public class ClientInvoker {
         request.setMethodName(method.getClientMethodName());
         request.setArgTypeNames(Arrays.stream(method.getArgTypes()).map(Class::getName).toList().toArray(new String[0]));
 //        request.setArgTypeNames((String[]) Arrays.stream(method.getArgTypes()).map(Class::getName).toArray());
-        request.setApplicationId(clientService.getServiceApplicationId());
+        request.setApplicationId(clientService.getServiceApplication().getApplicationId());
         invokerFilterChain.doFilter(request, invokerFilterChain);
+
+        ClientCallTask clientCallTask = new ClientCallTask(invokerFilterChain, request, clientService.getTimeout());
+
 //        ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
 //        String message = manager.getTransform(clientService.getTransformType()).transformRequestToString(request);
 //        try {

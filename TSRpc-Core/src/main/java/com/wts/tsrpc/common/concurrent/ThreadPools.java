@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A singleton class that manages thread pools.
@@ -64,6 +67,14 @@ public class ThreadPools {
             return executorService;
         }
         return THREAD_POOL_MAP.computeIfAbsent(poolName, _ -> Executors.newFixedThreadPool(fixedThreadNum, new NameThreadFactory(poolName)));
+    }
+
+    public ExecutorService getOrCreate(String poolName, Integer coreSize, Integer maxSize, Integer queueSize) {
+        ExecutorService executorService = get(poolName);
+        if (executorService != null) {
+            return executorService;
+        }
+        return THREAD_POOL_MAP.computeIfAbsent(poolName, _ -> new ThreadPoolExecutor(coreSize, maxSize, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(queueSize), new NameThreadFactory(poolName)));
     }
 
     /**

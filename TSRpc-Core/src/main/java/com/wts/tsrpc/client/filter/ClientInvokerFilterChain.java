@@ -8,6 +8,7 @@ import com.wts.tsrpc.common.Transformer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class ClientInvokerFilterChain implements ClientInvokerFilter {
@@ -17,7 +18,7 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
 
     private HttpClient httpClient;
 
-    private Transformer transformers;
+    private Transformer transformer;
 
     private List<ClientInvokerFilter> invokerFilters = new ArrayList<>();
 
@@ -26,23 +27,23 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
     }
 
     @Override
-    public void doFilter(ServiceRequest serviceRequest, ClientInvokerFilterChain filterChain) {
+    public void doFilter(ServiceRequest serviceRequest, ClientInvokerFilterChain filterChain, CompletableFuture<ServiceResponse> completableFuture) {
         if (pos == invokerFilters.size()) {
 //            ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
-            String message = transformers.transformRequestToString(serviceRequest);
+            String message = transformer.transformRequestToString(serviceRequest);
             try {
                 httpClient.connect().await(30, TimeUnit.SECONDS);
 //            httpClient.connect().addListener(_ ->
 //                    finalHttpClient.sendMsg(message)
 //                            .await(30, TimeUnit.SECONDS)).sync();
-                httpClient.sendMsg(message)
-                        .await(30, TimeUnit.SECONDS);
+                httpClient.sendMsg(message, completableFuture);
+//                        .await(30, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             return;
         }
-        invokerFilters.get(pos++).doFilter(serviceRequest, filterChain);
+        invokerFilters.get(pos++).doFilter(serviceRequest, filterChain, completableFuture);
     }
 
     private void sendMsg(ServiceRequest request, ServiceResponse response) {
@@ -66,8 +67,8 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
         return this;
     }
 
-    public Transformer getTransformers() {
-        return transformers;
+    public Transformer getTransformer() {
+        return transformer;
     }
 
     public HttpClient getHttpClient() {
@@ -89,7 +90,7 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
     }
 
     public ClientInvokerFilterChain transformers(Transformer transformers) {
-        this.transformers = transformers;
+        this.transformer = transformers;
         return this;
     }
 }

@@ -21,6 +21,7 @@ import com.wts.tsrpc.client.proxy.ClientServiceHandler;
 import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.client.utils.NameUtils;
 import com.wts.tsrpc.common.utils.ReflectUtils;
+import com.wts.tsrpc.server.manage.Application;
 import org.springframework.beans.factory.FactoryBean;
 
 import java.lang.reflect.Proxy;
@@ -52,11 +53,12 @@ public class TSClientProxyFactoryBean<T> implements FactoryBean<T> {
         ClientServiceHandler clientServiceHandler = new ClientServiceHandler();
         clientServiceHandler.setInterfaceType(interfaceType);
         ClientService clientService = new ClientService();
-        clientService.setServiceApplicationId(applicationId);
-        clientService.setServiceApplicationVersion(applicationVersion);
+        Application application = new Application().applicationId(applicationId).version(applicationVersion);
+        clientService.setServiceApplication(application);
         clientService.setServiceId(serviceId);
         clientService.setClientClassFullName(interfaceType.getName());
         clientService.setClientMethods(ReflectUtils.getClientMethods(interfaceType));
+        clientServiceHandler.setClientService(clientService);
         ClientServiceStorage.getInstance().addClientServiceClass(NameUtils.applicationKey(applicationId, applicationVersion), serviceId, interfaceType)
                 .addClientServiceHandler(NameUtils.serviceBeanName(applicationId, applicationVersion, serviceId), clientServiceHandler);
         return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, clientServiceHandler);
