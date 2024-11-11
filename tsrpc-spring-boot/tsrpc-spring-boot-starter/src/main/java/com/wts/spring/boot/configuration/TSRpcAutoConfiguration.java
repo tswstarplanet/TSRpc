@@ -17,18 +17,19 @@
 package com.wts.spring.boot.configuration;
 
 import com.wts.spring.boot.configuration.properties.ApplicationConfigurationProperties;
-import com.wts.spring.boot.configuration.properties.ClientProperties;
+import com.wts.spring.boot.configuration.properties.ClientCommonProperties;
+import com.wts.spring.boot.configuration.properties.ClientThreadPoolProperties;
 import com.wts.spring.boot.configuration.properties.CommonProperties;
 import com.wts.spring.boot.configuration.properties.RegistryProperties;
 import com.wts.spring.boot.configuration.properties.ServerProperties;
 import com.wts.tsrpc.client.ClientDispatcher;
 import com.wts.tsrpc.client.ClientEnd;
 import com.wts.tsrpc.client.Endpoint;
+import com.wts.tsrpc.client.concurrent.ClientThreadPool;
 import com.wts.tsrpc.client.filter.ClientInvokerFilter;
 import com.wts.tsrpc.client.loadbalance.LoadBalancer;
 import com.wts.tsrpc.client.loadbalance.RandomLoadBalancer;
 import com.wts.tsrpc.common.Transformer;
-import com.wts.tsrpc.client.concurrent.ClientThreadPool;
 import com.wts.tsrpc.common.registry.NacosRegistry;
 import com.wts.tsrpc.common.registry.Registry;
 import com.wts.tsrpc.common.transform.JacksonTransformer;
@@ -43,7 +44,6 @@ import com.wts.tsrpc.spring.config.ThreadPoolsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
@@ -52,7 +52,7 @@ import java.lang.reflect.InvocationTargetException;
 
 @AutoConfiguration
 @EnableConfigurationProperties({ApplicationConfigurationProperties.class, ServerProperties.class, RegistryProperties.class,
-        ClientProperties.class, CommonProperties.class})
+        ClientCommonProperties.class, CommonProperties.class, ClientThreadPoolProperties.class})
 public class TSRpcAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(TSRpcAutoConfiguration.class);
@@ -99,16 +99,16 @@ public class TSRpcAutoConfiguration {
 //        return new NacosRegistry(registryProperties.getServerList(), registryProperties.getNamespace());
 //    }
 
-    @Bean
-    @ConditionalOnProperty(prefix = "tsrpc.loadbalancer", name = "type", havingValue = "random")
-    public LoadBalancer loadBalancer(Registry registry) {
-        if (registry == null) {
-            String errorMsg = "Registry is null, please check the configuration";
-            logger.error(errorMsg);
-            throw new PanicException(errorMsg);
-        }
-        return new RandomLoadBalancer(registry);
-    }
+//    @Bean
+//    @ConditionalOnProperty(prefix = "tsrpc.loadbalancer", name = "type", havingValue = "random")
+//    public LoadBalancer loadBalancer(Registry registry) {
+//        if (registry == null) {
+//            String errorMsg = "Registry is null, please check the configuration";
+//            logger.error(errorMsg);
+//            throw new PanicException(errorMsg);
+//        }
+//        return new RandomLoadBalancer(registry);
+//    }
 
     @Bean("serverEndpoint")
     public Endpoint endpoint(ServerProperties serverProperties) {
@@ -132,10 +132,10 @@ public class TSRpcAutoConfiguration {
     }
 
     @Bean("clientDispatcher")
-    public ClientDispatcher clientDispatcher(ClientProperties clientProperties) {
+    public ClientDispatcher clientDispatcher(ClientCommonProperties clientCommonProperties) {
         ClientDispatcher clientDispatcher = new ClientDispatcher();
-        if (clientProperties.getInvokerFilters() != null) {
-            clientProperties.getInvokerFilters().forEach(filter -> {
+        if (clientCommonProperties.getInvokerFilters() != null) {
+            clientCommonProperties.getInvokerFilters().forEach(filter -> {
                 try {
                     clientDispatcher.addClientInvokerFilter((ClientInvokerFilter) Class.forName(filter).getDeclaredConstructor().newInstance());
                 } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
@@ -184,9 +184,9 @@ public class TSRpcAutoConfiguration {
     }
 
     @Bean("loadBalancer")
-    public LoadBalancer loadBalancer(ClientProperties clientProperties, Registry registry) {
+    public LoadBalancer loadBalancer(ClientCommonProperties clientCommonProperties, Registry registry) {
         LoadBalancer loadBalancer = null;
-        if ("random".equals(clientProperties.getBalancerType())) {
+        if ("random".equals(clientCommonProperties.getBalancerType())) {
             loadBalancer = new RandomLoadBalancer(registry);
         } // Todo other loadBalancer will be implemented later
         return loadBalancer;
@@ -198,17 +198,17 @@ public class TSRpcAutoConfiguration {
 //    }
 
     @Bean("tsClientBeanDefinitionRegistryPostProcessor")
-    public TSClientBeanDefinitionRegistryPostProcessor tsClientBeanDefinitionRegistryPostProcessor(ClientProperties clientProperties) {
-        return new TSClientBeanDefinitionRegistryPostProcessor(clientProperties.getBasePackage());
+    public TSClientBeanDefinitionRegistryPostProcessor tsClientBeanDefinitionRegistryPostProcessor() {
+        return new TSClientBeanDefinitionRegistryPostProcessor();
     }
 
     @Bean("clientThreadPool")
-    public ClientThreadPool clientThreadPool(ClientProperties clientProperties) {
-        return new ClientThreadPool(clientProperties.getThreadPool().getCorePoolSize(), clientProperties.getThreadPool().getMaximumPoolSize(), clientProperties.getThreadPool().getQueueSize());
+    public ClientThreadPool clientThreadPool(ClientThreadPoolProperties clientThreadPoolProperties) {
+        return new ClientThreadPool(clientThreadPoolProperties.getCorePoolSize(), clientThreadPoolProperties.getMaxPoolSize(), clientThreadPoolProperties.getQueueSize());
     }
 
     @Bean("clientEnd")
-    public ClientEnd clientEnd(ClientProperties clientProperties) {
-        return new ClientEnd(clientProperties.getTimeout());
+    public ClientEnd clientEnd(ClientCommonProperties clientCommonProperties) {
+        return new ClientEnd(clientCommonProperties.getTimeout());
     }
 }

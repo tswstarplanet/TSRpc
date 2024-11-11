@@ -1,9 +1,9 @@
 package com.wts.tsrpc.common;
 
 public enum ServiceResponseCode {
-    SUCCESS("000000", "成功"),
-    INVALID_HTTP_METHOD("000001", "非法的Http方法"),
-    HTTP_NOT_SUCCEED("000002", "Http状态不成功");
+    SUCCESS("000000", "success"),
+    INVALID_HTTP_METHOD("000001", "invalid http method"),
+    HTTP_NOT_SUCCEED("000002", "http not succeed"),;
     private final String code;
 
     private final String msg;

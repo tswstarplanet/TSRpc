@@ -8,12 +8,12 @@ import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.common.Transformer;
+import com.wts.tsrpc.exception.PanicException;
 
 import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 public class ClientInvoker {
 
@@ -67,9 +67,20 @@ public class ClientInvoker {
         request.setArgTypeNames(Arrays.stream(method.getArgTypes()).map(Class::getName).toList().toArray(new String[0]));
 //        request.setArgTypeNames((String[]) Arrays.stream(method.getArgTypes()).map(Class::getName).toArray());
         request.setApplicationId(clientService.getServiceApplication().getApplicationId());
-        invokerFilterChain.doFilter(request, invokerFilterChain);
+//        invokerFilterChain.doFilter(request, invokerFilterChain);
 
         ClientCallTask clientCallTask = new ClientCallTask(invokerFilterChain, request, clientService.getTimeout());
+        Future<ServiceResponse> future = executorService.submit(clientCallTask);
+        ServiceResponse serviceResponse;
+        try {
+            serviceResponse = future.get(clientService.getTimeout(), TimeUnit.MILLISECONDS);
+            String body = transformer.transformObjectToString(serviceResponse.getBody());
+            return transformer.transformReturnValueObject(body, method.getReturnGenericType());
+        } catch (Exception e) {
+            throw new PanicException(e);
+        } finally {
+            ClientInvokerResponseCache.getInstance().remove(request.getRequestId());
+        }
 
 //        ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
 //        String message = manager.getTransform(clientService.getTransformType()).transformRequestToString(request);
@@ -83,13 +94,15 @@ public class ClientInvoker {
 //        } catch (InterruptedException e) {
 //            throw new RuntimeException(e);
 //        }
-        ServiceResponse serviceResponse = HttpClientHandler.getServiceResponse(request.getRequestId());
-        try {
-            String body = transformer.transformObjectToString(serviceResponse.getBody());
-            return transformer.transformReturnValueObject(body, method.getReturnGenericType());
-        } finally {
-            HttpClientHandler.removeServiceResponse(request.getRequestId());
-        }
+
+
+//        ServiceResponse serviceResponse = HttpClientHandler.getServiceResponse(request.getRequestId());
+//        try {
+//            String body = transformer.transformObjectToString(serviceResponse.getBody());
+//            return transformer.transformReturnValueObject(body, method.getReturnGenericType());
+//        } finally {
+//            HttpClientHandler.removeServiceResponse(request.getRequestId());
+//        }
 
 
     }

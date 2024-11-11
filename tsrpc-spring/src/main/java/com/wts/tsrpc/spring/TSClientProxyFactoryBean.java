@@ -22,11 +22,11 @@ import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.client.utils.NameUtils;
 import com.wts.tsrpc.common.utils.ReflectUtils;
 import com.wts.tsrpc.server.manage.Application;
-import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.SmartFactoryBean;
 
 import java.lang.reflect.Proxy;
 
-public class TSClientProxyFactoryBean<T> implements FactoryBean<T> {
+public class TSClientProxyFactoryBean<T> implements SmartFactoryBean<T> {
 
     /**
      * Interface type
@@ -67,6 +67,11 @@ public class TSClientProxyFactoryBean<T> implements FactoryBean<T> {
     @Override
     public Class<?> getObjectType() {
         return null;
+    }
+
+    @Override
+    public boolean isEagerInit() {
+        return true;
     }
 
     public Class<T> getInterfaceType() {

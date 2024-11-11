@@ -30,13 +30,13 @@ public class ClientInvokerFilterChain implements ClientInvokerFilter {
     public void doFilter(ServiceRequest serviceRequest, ClientInvokerFilterChain filterChain, CompletableFuture<ServiceResponse> completableFuture) {
         if (pos == invokerFilters.size()) {
 //            ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);
-            String message = transformer.transformRequestToString(serviceRequest);
+//            String message = transformer.transformRequestToString(serviceRequest);
             try {
                 httpClient.connect().await(30, TimeUnit.SECONDS);
 //            httpClient.connect().addListener(_ ->
 //                    finalHttpClient.sendMsg(message)
 //                            .await(30, TimeUnit.SECONDS)).sync();
-                httpClient.sendMsg(message, completableFuture);
+                httpClient.sendRequest(serviceRequest, completableFuture);
 //                        .await(30, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);

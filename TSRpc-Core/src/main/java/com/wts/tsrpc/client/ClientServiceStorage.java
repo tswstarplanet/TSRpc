@@ -77,7 +77,7 @@ public class ClientServiceStorage {
             throw new PanicException(STR."Client Service Class of serviceId [\{serviceId}] of [\{applicationKey}] has been existed !");
         }
         tempServiceClassMap.put(serviceId, clientServiceClass);
-        if (!clientServiceClassSet.contains(clientServiceClass)) {
+        if (clientServiceClassSet.contains(clientServiceClass)) {
             throw new PanicException(STR."Client Service Class of [\{clientServiceClass.getName()}] has been existed !");
         }
         clientServiceClassSet.add(clientServiceClass);

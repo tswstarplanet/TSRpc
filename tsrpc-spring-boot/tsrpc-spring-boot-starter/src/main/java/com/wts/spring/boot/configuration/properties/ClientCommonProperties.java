@@ -17,42 +17,11 @@
 package com.wts.spring.boot.configuration.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 import java.util.List;
 
-@ConfigurationProperties(prefix = "tsrpc.client")
-public class ClientProperties {
-
-    public static class ThreadPoolProperties {
-        private Integer corePoolSize = 100;
-        private Integer maximumPoolSize = 200;
-        private Integer queueSize = 100;
-
-        public Integer getCorePoolSize() {
-            return corePoolSize;
-        }
-
-        public void setCorePoolSize(Integer corePoolSize) {
-            this.corePoolSize = corePoolSize;
-        }
-
-        public Integer getMaximumPoolSize() {
-            return maximumPoolSize;
-        }
-
-        public void setMaximumPoolSize(Integer maximumPoolSize) {
-            this.maximumPoolSize = maximumPoolSize;
-        }
-
-        public Integer getQueueSize() {
-            return queueSize;
-        }
-
-        public void setQueueSize(Integer queueSize) {
-            this.queueSize = queueSize;
-        }
-    }
+@ConfigurationProperties(prefix = "tsrpc.client.common")
+public class ClientCommonProperties {
 
     private String balancerType = "random";
 
@@ -62,8 +31,6 @@ public class ClientProperties {
 
     private List<String> invokerFilters = List.of("com.wts.tsrpc.client.filter.LogClientInvokerFilter", "com.wts.tsrpc.client.filter.CheckClientInvokerFilter");
 
-    @NestedConfigurationProperty
-    private ThreadPoolProperties threadPool = new ThreadPoolProperties();
 
     public String getBalancerType() {
         return balancerType;
@@ -87,14 +54,6 @@ public class ClientProperties {
 
     public void setInvokerFilters(List<String> invokerFilters) {
         this.invokerFilters = invokerFilters;
-    }
-
-    public ThreadPoolProperties getThreadPool() {
-        return threadPool;
-    }
-
-    public void setThreadPool(ThreadPoolProperties threadPool) {
-        this.threadPool = threadPool;
     }
 
     public Long getTimeout() {

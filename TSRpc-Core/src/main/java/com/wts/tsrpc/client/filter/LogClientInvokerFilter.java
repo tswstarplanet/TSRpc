@@ -14,7 +14,7 @@ public class LogClientInvokerFilter implements ClientInvokerFilter {
     @Override
     public void doFilter(ServiceRequest request, ClientInvokerFilterChain filterChain, CompletableFuture<ServiceResponse> completableFuture) {
         logger.info("Log client invoker filter start !");
-        filterChain.doFilter(request, filterChain);
+        filterChain.doFilter(request, filterChain, completableFuture);
         logger.info("Log client invoker filter end !");
     }
 }

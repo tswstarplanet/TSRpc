@@ -44,7 +44,7 @@ public class HttpClientHandler extends SimpleChannelInboundHandler<FullHttpRespo
         String body = HttpUtils.getBody(msg);
         ServiceResponse serviceResponse = transformer.transformResponse(body);
 
-        CompletableFuture<ServiceResponse> completableFuture = pendingResponseMap.remove(serviceResponse.getRequestId());
+        CompletableFuture<ServiceResponse> completableFuture = ClientInvokerResponseCache.getInstance().get(serviceResponse.getRequestId());
         if (completableFuture != null) {
             completableFuture.complete(serviceResponse);
         }

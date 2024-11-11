@@ -20,6 +20,7 @@ import com.wts.tsrpc.client.utils.NameUtils;
 import com.wts.tsrpc.spring.TSClientProxyFactoryBean;
 import com.wts.tsrpc.spring.config.annotation.TSClient;
 import com.wts.tsrpc.spring.utils.AnnotationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -27,22 +28,35 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.env.Environment;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 /**
  * TSClient scanner
  */
-public class TSClientBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
+public class TSClientBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
 
     private String basePackage;
 
-    public TSClientBeanDefinitionRegistryPostProcessor(String basePackage) {
-        this.basePackage = basePackage;
+    private Environment environment;
+
+    public TSClientBeanDefinitionRegistryPostProcessor() {
+
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+        basePackage = environment.getProperty("tsrpc.client.common.basePackage");
+        if (StringUtils.isEmpty(basePackage)) {
+            return;
+        }
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false) {
             @Override
             protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
@@ -62,7 +76,9 @@ public class TSClientBeanDefinitionRegistryPostProcessor implements BeanDefiniti
                 builder.addPropertyValue("applicationId", tsClient.applicationId());
                 builder.addPropertyValue("applicationVersion", tsClient.applicationVersion());
                 builder.addPropertyValue("serviceId", tsClient.serviceId());
-                registry.registerBeanDefinition(NameUtils.serviceBeanName(tsClient.applicationId(), tsClient.applicationVersion(), tsClient.serviceId()), builder.getBeanDefinition());
+                builder.setLazyInit(false);
+                builder.setScope(BeanDefinition.SCOPE_SINGLETON);
+                registry.registerBeanDefinition(NameUtils.serviceBeanName(tsClient.applicationId(), tsClient.applicationVersion(), tsClient.serviceId()) + "_factoryBean", builder.getBeanDefinition());
             } catch (ClassNotFoundException e) {
                 throw new BeansException("Cannot load class：" + interfaceName, e) {};
             }
