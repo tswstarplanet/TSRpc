@@ -85,6 +85,8 @@ public class TSClientBeanDefinitionRegistryPostProcessor implements BeanDefiniti
         }
     }
 
+
+
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         BeanDefinitionRegistryPostProcessor.super.postProcessBeanFactory(beanFactory);

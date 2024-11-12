@@ -117,7 +117,7 @@ public class ClientServiceStorage {
         }
     }
 
-    public Map<String, ClientServiceHandler> getClientServiceHandlerMap(String applicationId) {
+    public Map<String, ClientServiceHandler> getClientServiceHandlerMap() {
         return Collections.unmodifiableMap(clientServiceHandlerMap);
     }
 }

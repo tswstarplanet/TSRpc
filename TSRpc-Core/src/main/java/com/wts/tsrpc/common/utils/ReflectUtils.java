@@ -103,7 +103,7 @@ public class ReflectUtils {
      */
     public static List<Method> getPublicDeclaredMethods(Class<?> clazz) {
         Method[] methods = clazz.getDeclaredMethods();
-        return Arrays.stream(methods).filter(method -> method.getModifiers() == Modifier.PUBLIC).toList();
+        return Arrays.stream(methods).filter(method -> Modifier.isPublic(method.getModifiers())).toList();
     }
 
     /**

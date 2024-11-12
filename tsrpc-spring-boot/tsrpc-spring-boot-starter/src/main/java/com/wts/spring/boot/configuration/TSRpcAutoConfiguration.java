@@ -47,10 +47,12 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Import;
 
 import java.lang.reflect.InvocationTargetException;
 
 @AutoConfiguration
+@Import(TSClientConfiguration.class)
 @EnableConfigurationProperties({ApplicationConfigurationProperties.class, ServerProperties.class, RegistryProperties.class,
         ClientCommonProperties.class, CommonProperties.class, ClientThreadPoolProperties.class})
 public class TSRpcAutoConfiguration {
@@ -197,7 +199,7 @@ public class TSRpcAutoConfiguration {
 //        return new ClientServiceStorage();
 //    }
 
-    @Bean("tsClientBeanDefinitionRegistryPostProcessor")
+//    @Bean("tsClientBeanDefinitionRegistryPostProcessor")
     public TSClientBeanDefinitionRegistryPostProcessor tsClientBeanDefinitionRegistryPostProcessor() {
         return new TSClientBeanDefinitionRegistryPostProcessor();
     }
@@ -210,5 +212,10 @@ public class TSRpcAutoConfiguration {
     @Bean("clientEnd")
     public ClientEnd clientEnd(ClientCommonProperties clientCommonProperties) {
         return new ClientEnd(clientCommonProperties.getTimeout());
+    }
+
+    @Bean("TSRpcClientInitializer")
+    public TSRpcClientInitializer tsRpcClientInitializer() {
+        return new TSRpcClientInitializer();
     }
 }

@@ -47,7 +47,7 @@ public class ClassTool {
     private ClientDispatcher clientDispatcher;
 
     public ClassTool clientDispatcher(ClientDispatcher clientDispatcher) {
-        this.serviceDispatcher = serviceDispatcher;
+        this.clientDispatcher = clientDispatcher;
         return this;
     }
 

@@ -1,13 +1,20 @@
 package com.wts.tsrpc.server.manage;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Application {
     private String applicationId;
 
     private String version;
 
-//    private static final Application application = new Application();
+    private static final Map<String, Application> APPLICATION_MAP = new ConcurrentHashMap<>();
+
+    public static Application getApplication(String applicationId, String version) {
+        String key = applicationId + ":" + version;
+        return APPLICATION_MAP.computeIfAbsent(key, _ -> new Application(applicationId, version));
+    }
 
     public Application() {
 

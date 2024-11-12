@@ -19,6 +19,7 @@ package com.wts.spring.boot.configuration;
 import com.wts.tsrpc.client.ClientDispatcher;
 import com.wts.tsrpc.client.ClientEnd;
 import com.wts.tsrpc.client.ClientInvoker;
+import com.wts.tsrpc.client.ClientServiceStorage;
 import com.wts.tsrpc.client.concurrent.ClientThreadPool;
 import com.wts.tsrpc.client.loadbalance.LoadBalancer;
 import com.wts.tsrpc.client.proxy.ClientServiceHandler;
@@ -47,12 +48,13 @@ public class TSRpcClientInitializer implements SmartInitializingSingleton, Appli
     }
 
     private void initClient() {
-        Map<String, ClientServiceHandler> clientServiceHandlerMap = applicationContext.getBeansOfType(ClientServiceHandler.class);
+        Map<String, ClientServiceHandler> clientServiceHandlerMap = ClientServiceStorage.getInstance().getClientServiceHandlerMap();
         clientServiceHandlerMap.forEach((_, clientServiceHandler) -> {
             Class<?> interfaceType = clientServiceHandler.getInterfaceType();
-            Application application = applicationContext.getBean(Application.class);
+            Application application = clientServiceHandler.getClientService().getServiceApplication();
             ClassTool classTool = new ClassTool();
-            classTool.clientDispatcher(applicationContext.getBean("clientDispatcher", ClientDispatcher.class));
+            ClientDispatcher clientDispatcher = applicationContext.getBean("clientDispatcher", ClientDispatcher.class);
+            classTool.clientDispatcher(clientDispatcher);
             Object target = classTool.getOrCreateClientServiceProxy(interfaceType, interfaceType.getDeclaredMethods(), application, clientServiceHandler.getClientService());
             clientServiceHandler.setTarget(target);
 
@@ -63,7 +65,6 @@ public class TSRpcClientInitializer implements SmartInitializingSingleton, Appli
                     .loadBalancer(applicationContext.getBean("loadBalancer", LoadBalancer.class))
                     .clientDispatcher(applicationContext.getBean("clientDispatcher", ClientDispatcher.class))
                     .executorService(applicationContext.getBean("clientThreadPool", ClientThreadPool.class).getExecutorService());
-            ClientDispatcher clientDispatcher = applicationContext.getBean("clientDispatcher", ClientDispatcher.class);
             clientDispatcher.addClientInvoker(application.getKey(), clientServiceHandler.getClientService().getServiceId(), clientInvoker);
 
             Registry registry = applicationContext.getBean(Registry.class);
