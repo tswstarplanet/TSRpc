@@ -211,7 +211,7 @@ public class ClassTool {
                 methodBody = STR."\{methodBody}};";
                 methodBody = STR."\{methodBody} com.wts.tsrpc.client.service.ClientMethod clientMethod = new com.wts.tsrpc.client.service.ClientMethod(); clientMethod.clientMethodName(\"\{methodName}\"); clientMethod.clientClassFullName(\"\{clientService.getClientClassFullName()}\");";
 //                methodBody = STR."\{methodBody} try { clientMethod.argTypes(\{ReflectUtils.getArgsString(argTypes)}); } catch(Exception e) { throw new com.wts.tsrpc.exception.BizException(\"Class not found excpetion\"); }";
-                methodBody = STR."\{methodBody} try { clientMethod.argTypes(\{ReflectUtils.getArgsString(argTypes)}); } catch(java.lang.Exception e) { throw new java.lang.RuntimeException(e); }";
+                methodBody = STR."\{methodBody} try { clientMethod.argTypes(\{ReflectUtils.getArgsString(argTypes)}); clientMethod.returnGenericType(Class.forName(\"\{((Class<?>)clientMethod.getReturnGenericType()).getName()}\")); } catch(java.lang.Exception e) { throw new java.lang.RuntimeException(e); }";
                 methodBody = STR."{ \{methodBody} return (\{returnType.getName()})$0.clientInvoker.invoke(args, clientMethod); }";
                 ctMethod.setBody(methodBody);
                 cc.addMethod(ctMethod);

@@ -129,7 +129,9 @@ public class ReflectUtils {
         ClientMethod clientMethod = new ClientMethod();
         clientMethod.clientMethodName(method.getName());
         clientMethod.argTypes(method.getParameterTypes());
-
+        clientMethod.clientClassFullName(method.getDeclaringClass().getName());
+        clientMethod.returnType(method.getReturnType());
+        clientMethod.returnGenericType(method.getGenericReturnType());
         return clientMethod;
     }
 

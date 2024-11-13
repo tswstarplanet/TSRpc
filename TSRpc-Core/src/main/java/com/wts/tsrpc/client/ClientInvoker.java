@@ -49,8 +49,13 @@ public class ClientInvoker {
         return this;
     }
 
+    public ClientInvoker transformer(Transformer transformer) {
+        this.transformer = transformer;
+        return this;
+    }
+
     public Object invoke(Object[] arguments, ClientMethod method) {
-        method.settleGenericParamTypes();
+//        method.settleGenericParamTypes();
 //        String applicationId = clientService.getServiceApplicationId();
         var applicationInstance = loadBalancer.balance(clientService.getServiceApplication());
         HttpClient httpClient = HttpClient.getHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()));

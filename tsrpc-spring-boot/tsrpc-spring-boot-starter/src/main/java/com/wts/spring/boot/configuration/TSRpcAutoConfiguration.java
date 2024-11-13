@@ -69,7 +69,7 @@ public class TSRpcAutoConfiguration {
         return new Application(applicationConfigurationProperties.getApplicationId(), applicationConfigurationProperties.getVersion());
     }
 
-    @Bean
+    @Bean("transformer")
     public Transformer transformer(CommonProperties commonProperties, ServiceDispatcher serviceDispatcher) {
         Transformer transformer = null;
         if ("jackson".equals(commonProperties.getTransformType())) {

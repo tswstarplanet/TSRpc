@@ -52,8 +52,8 @@ public abstract class AbstractRegistry implements Registry {
         this.instanceMap = instanceMap;
     }
 
-    protected boolean checkApplicationSubscribed(Application application) {
-        return subscribedApplications.get(application);
+    protected Boolean checkApplicationSubscribed(Application application) {
+        return Boolean.TRUE.equals(subscribedApplications.get(application));
     }
 
     public Object getLock() {
