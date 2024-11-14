@@ -1,6 +1,7 @@
 package com.wts.tsrpc.server;
 
 import com.wts.tsrpc.common.Transformer;
+import com.wts.tsrpc.server.concurrent.ServerThreadPool;
 import com.wts.tsrpc.server.manage.ServiceDispatcher;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -25,12 +26,15 @@ public class HttpServer implements Server {
 
     private ChannelHandler serverInitializer;
 
+    private ServerThreadPool serverThreadPool;
+
     public HttpServer() {}
 
-    public HttpServer(Integer port, Integer bossNum, Integer workerNum) {
+    public HttpServer(Integer port, Integer bossNum, Integer workerNum, ServerThreadPool serverThreadPool) {
         this.port = port;
         this.bossNum = bossNum;
         this.workerNum = workerNum;
+        this.serverThreadPool = serverThreadPool;
     }
 
     public HttpServer port(Integer port) {
@@ -50,7 +54,7 @@ public class HttpServer implements Server {
 
     @Override
     public Server init(ServiceDispatcher serviceDispatcher, Transformer transformer) {
-        this.serverInitializer = new HttpServerInitializer().serviceDispatcher(serviceDispatcher).transformer(transformer);
+        this.serverInitializer = new HttpServerInitializer().serviceDispatcher(serviceDispatcher).transformer(transformer).serverThreadPool(serverThreadPool);
         return this;
     }
 

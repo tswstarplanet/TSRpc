@@ -27,6 +27,8 @@ public class ClientInvokerResponseCache {
 
     private static final ClientInvokerResponseCache instance = new ClientInvokerResponseCache();
 
+    private static final Map<String, Throwable> exceptionMap = new java.util.concurrent.ConcurrentHashMap<>();
+
     private ClientInvokerResponseCache() {
     }
 
@@ -34,16 +36,23 @@ public class ClientInvokerResponseCache {
         return instance;
     }
 
-    public void put(String requestId, CompletableFuture<ServiceResponse> responseFuture) {
+    public void putFuture(String requestId, CompletableFuture<ServiceResponse> responseFuture) {
         pendingResponseMap.put(requestId, responseFuture);
     }
 
-    public CompletableFuture<ServiceResponse> get(String requestId) {
+    public CompletableFuture<ServiceResponse> getFuture(String requestId) {
         return pendingResponseMap.get(requestId);
     }
 
-    public void remove(String requestId) {
+    public void removeFuture(String requestId) {
         pendingResponseMap.remove(requestId);
     }
 
+    public void putException(String requestId, Throwable throwable) {
+        exceptionMap.put(requestId, throwable);
+    }
+
+    public Throwable getException(String requestId) {
+        return exceptionMap.get(requestId);
+    }
 }

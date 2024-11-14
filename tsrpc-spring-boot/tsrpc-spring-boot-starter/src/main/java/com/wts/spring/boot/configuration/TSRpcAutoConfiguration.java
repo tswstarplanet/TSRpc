@@ -37,6 +37,7 @@ import com.wts.tsrpc.common.utils.NetworkUtils;
 import com.wts.tsrpc.exception.PanicException;
 import com.wts.tsrpc.server.HttpServer;
 import com.wts.tsrpc.server.Server;
+import com.wts.tsrpc.server.concurrent.ServerThreadPool;
 import com.wts.tsrpc.server.filter.ServerInvokerFilter;
 import com.wts.tsrpc.server.manage.Application;
 import com.wts.tsrpc.server.manage.ServiceDispatcher;
@@ -150,10 +151,10 @@ public class TSRpcAutoConfiguration {
     }
 
     @Bean("server")
-    public Server server(ServerProperties serverProperties, CommonProperties commonProperties, ServiceDispatcher serviceDispatcher, Transformer transformer) {
+    public Server server(ServerProperties serverProperties, CommonProperties commonProperties, ServiceDispatcher serviceDispatcher, Transformer transformer, ServerThreadPool serverThreadPool) {
         Server server = null;
         if ("http".equals(commonProperties.getProtocol())) {
-            server = new HttpServer(serverProperties.getPort(), serverProperties.getBossNum(), serverProperties.getWorkerNum());
+            server = new HttpServer(serverProperties.getPort(), serverProperties.getBossNum(), serverProperties.getWorkerNum(), serverThreadPool);
             server.init(serviceDispatcher, transformer);
         } // todo other server will be implemented in the future
         return server;
@@ -217,5 +218,10 @@ public class TSRpcAutoConfiguration {
     @Bean("TSRpcClientInitializer")
     public TSRpcClientInitializer tsRpcClientInitializer() {
         return new TSRpcClientInitializer();
+    }
+
+    @Bean("serverThreadPool")
+    public ServerThreadPool serverThreadPool(ServerProperties serverProperties) {
+        return new ServerThreadPool(serverProperties.getCorePoolSize(), serverProperties.getMaxPoolSize(), serverProperties.getQueueSize());
     }
 }

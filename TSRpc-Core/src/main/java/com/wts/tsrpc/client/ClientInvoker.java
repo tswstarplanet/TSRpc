@@ -7,8 +7,11 @@ import com.wts.tsrpc.client.service.ClientMethod;
 import com.wts.tsrpc.client.service.ClientService;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
+import com.wts.tsrpc.common.ServiceResponseCode;
 import com.wts.tsrpc.common.Transformer;
 import com.wts.tsrpc.exception.PanicException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -16,6 +19,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class ClientInvoker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientInvoker.class);
 
     private ClientService clientService;
 
@@ -79,12 +83,19 @@ public class ClientInvoker {
         ServiceResponse serviceResponse;
         try {
             serviceResponse = future.get(clientService.getTimeout(), TimeUnit.MILLISECONDS);
+            if (serviceResponse == null) {
+                throw new PanicException("Service response is null !");
+            } else if (!ServiceResponseCode.SUCCESS.getCode().equals(serviceResponse.getCode())) {
+                throw new PanicException("Service invoke not success, error msg: " + serviceResponse.getMsg());
+            }
             String body = transformer.transformObjectToString(serviceResponse.getBody());
             return transformer.transformReturnValueObject(body, method.getReturnGenericType());
         } catch (Exception e) {
-            throw new PanicException(e);
+            LOGGER.debug("Service invoke error: {}", e.getMessage());
+            ClientInvokerResponseCache.getInstance().putException(request.getRequestId(), e);
+            throw new PanicException(e.getMessage(), e);
         } finally {
-            ClientInvokerResponseCache.getInstance().remove(request.getRequestId());
+            ClientInvokerResponseCache.getInstance().removeFuture(request.getRequestId());
         }
 
 //        ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);

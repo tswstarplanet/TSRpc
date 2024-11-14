@@ -77,7 +77,7 @@ public class HttpClient implements Client{
     public ChannelFuture sendRequest(ServiceRequest serviceRequest, CompletableFuture<ServiceResponse> completableFuture) {
 
 //        ClientInvokerResponseCache.getInstance().
-        ClientInvokerResponseCache.getInstance().put(serviceRequest.getRequestId(), completableFuture);
+        ClientInvokerResponseCache.getInstance().putFuture(serviceRequest.getRequestId(), completableFuture);
 
         String msg = transformer.transformRequestToString(serviceRequest);
 

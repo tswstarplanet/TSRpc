@@ -37,6 +37,12 @@ public class ServerProperties {
 
     private String transformType;
 
+    private Integer corePoolSize = 200;
+
+    private Integer maxPoolSize = 400;
+
+    private Integer queueSize = 100;
+
     private List<String> invokerFilters = new ArrayList<>(Arrays.asList("com.wts.tsrpc.server.filter.LogServerInvokerFilter", "com.wts.tsrpc.server.filter.CheckServerInvokerFilter"));
 
     public String getProtocol() {
@@ -93,5 +99,29 @@ public class ServerProperties {
 
     public void setInvokerFilters(List<String> invokerFilters) {
         this.invokerFilters = invokerFilters;
+    }
+
+    public Integer getCorePoolSize() {
+        return corePoolSize;
+    }
+
+    public void setCorePoolSize(Integer corePoolSize) {
+        this.corePoolSize = corePoolSize;
+    }
+
+    public Integer getMaxPoolSize() {
+        return maxPoolSize;
+    }
+
+    public void setMaxPoolSize(Integer maxPoolSize) {
+        this.maxPoolSize = maxPoolSize;
+    }
+
+    public Integer getQueueSize() {
+        return queueSize;
+    }
+
+    public void setQueueSize(Integer queueSize) {
+        this.queueSize = queueSize;
     }
 }

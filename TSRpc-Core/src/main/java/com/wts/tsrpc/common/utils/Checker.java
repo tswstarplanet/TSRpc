@@ -3,7 +3,7 @@ package com.wts.tsrpc.common.utils;
 import java.util.function.Predicate;
 
 public enum Checker {
-    HTTP_METHOD_CHECK(method -> ((String) method).equals("POST"));
+    HTTP_METHOD_CHECK(method -> method.equals("POST"));
 
     private final Predicate<Object> predicate;
 

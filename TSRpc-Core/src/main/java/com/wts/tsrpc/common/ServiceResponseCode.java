@@ -3,7 +3,8 @@ package com.wts.tsrpc.common;
 public enum ServiceResponseCode {
     SUCCESS("000000", "success"),
     INVALID_HTTP_METHOD("000001", "invalid http method"),
-    HTTP_NOT_SUCCEED("000002", "http not succeed"),;
+    HTTP_NOT_SUCCEED("000002", "http not succeed"),
+    SERVER_EXECUTE_ERROR("000003", "server execute error"),;
     private final String code;
 
     private final String msg;

@@ -17,6 +17,7 @@
 package com.wts.tsrpc.client.proxy;
 
 import com.wts.tsrpc.client.service.ClientService;
+import com.wts.tsrpc.exception.PanicException;
 import org.slf4j.Logger;
 
 import java.lang.reflect.InvocationHandler;
@@ -30,6 +31,9 @@ public class ClientServiceHandler implements InvocationHandler {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ClientServiceHandler.class);
 
+    /**
+     * Client service interface type
+     */
     private Class<?> interfaceType;
 
     /**
@@ -49,9 +53,14 @@ public class ClientServiceHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         LOGGER.debug("Before call client service method, service: {}, method: {}", proxy.getClass().getName(), method.getName());
-        Object result = method.invoke(target, args);
-        LOGGER.debug("After call client service method, service: {}, method: {}", proxy.getClass().getName(), method.getName());
-        return result;
+        try {
+            Object result = method.invoke(target, args);
+            LOGGER.debug("After call client service method, service: {}, method: {}", proxy.getClass().getName(), method.getName());
+            return result;
+        } catch (Throwable e) {
+            LOGGER.error("Error: " + e.getMessage(), e);
+            throw new PanicException(e.getCause());
+        }
     }
 
     public Class<?> getInterfaceType() {

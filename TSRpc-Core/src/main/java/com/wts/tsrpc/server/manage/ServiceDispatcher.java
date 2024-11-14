@@ -31,6 +31,8 @@ public class ServiceDispatcher {
 
     private final Map<String, Map<String, List<Type>>> serviceMethodParamTypeMap = new ConcurrentHashMap<>();
 
+    private final Map<String, ServiceInvoker> serviceInvokerMap = new ConcurrentHashMap<>();
+
     private static final Object serviceLock = new Object();
 
     private String serviceInvoker;
@@ -58,8 +60,14 @@ public class ServiceDispatcher {
 
         switch (getServiceInvoker()) {
             // todo avoid create new instance every time
-            case "reflect" -> invoker = new ReflectServiceInvoker(service, getServiceObject(request.getServiceId()));
-            case "javassist" -> invoker = new JavassistServiceInvoker(service, this);
+            case "reflect" -> {
+                invoker = serviceInvokerMap.computeIfAbsent(request.getServiceId(), serviceId -> new ReflectServiceInvoker(service, getServiceObject(serviceId)));
+//                invoker = new ReflectServiceInvoker(service, getServiceObject(request.getServiceId()));
+            }
+            case "javassist" -> {
+                invoker = serviceInvokerMap.computeIfAbsent(request.getServiceId(), _ -> new JavassistServiceInvoker(service, this));
+//                invoker = new JavassistServiceInvoker(service, this);
+            }
             default -> invoker = new ReflectServiceInvoker(service, getServiceObject(request.getServiceId()));
         }
         filterChain.setServiceInvoker(invoker);
