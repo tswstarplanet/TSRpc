@@ -9,6 +9,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,12 +45,13 @@ public class HttpClientHandler extends SimpleChannelInboundHandler<FullHttpRespo
         String body = HttpUtils.getBody(msg);
         ServiceResponse serviceResponse = transformer.transformResponse(body);
 
-        CompletableFuture<ServiceResponse> completableFuture = ClientInvokerResponseCache.getInstance().getFuture(serviceResponse.getRequestId());
-        if (completableFuture != null) {
-            completableFuture.complete(serviceResponse);
+        // todo use a memory delay queue to remove the service response to avoid the null request id
+        if (StringUtils.isNotEmpty(serviceResponse.getRequestId())) {
+            CompletableFuture<ServiceResponse> completableFuture = ClientInvokerResponseCache.getInstance().getFuture(serviceResponse.getRequestId());
+            if (completableFuture != null) {
+                completableFuture.complete(serviceResponse);
+            }
         }
-
-
 //        serviceResponseMap.putIfAbsent(serviceResponse.getRequestId(), new ArrayBlockingQueue<>(1));
 //        serviceResponseMap.get(serviceResponse.getRequestId()).put(serviceResponse);
     }

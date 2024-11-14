@@ -90,7 +90,7 @@ public class ClientInvoker {
             }
             String body = transformer.transformObjectToString(serviceResponse.getBody());
             return transformer.transformReturnValueObject(body, method.getReturnGenericType());
-        } catch (Exception e) {
+        } catch (Exception e) { // todo use specific exception
             LOGGER.debug("Service invoke error: {}", e.getMessage());
             ClientInvokerResponseCache.getInstance().putException(request.getRequestId(), e);
             throw new PanicException(e.getMessage(), e);

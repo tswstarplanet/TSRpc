@@ -41,7 +41,9 @@ public interface ProviderService {
 }
 ```
 
-In fact the interface annotated by @TSClient can be provided by the server end
+The method signatures and parameters in the client interface must be exactly the same as those in the server-side implementation class, including the fully qualified names of the parameter types.
+
+In fact the interface annotated by @TSClient can be contained in a jar provided by the server end.
 
 Start the nacos server, the server application, and the client application, and then you can invoke the remote service like this:
 
