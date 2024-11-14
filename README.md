@@ -86,7 +86,7 @@ mvn clean install
 
 2. Download the sample project.
 
-Download the sample project from the following link: [TSRpcServerDemo](https://) and [TSRpcClientDemo](https://).
+Download the sample project from the following link: [TSRpcServerDemo](https://github.com/tswstarplanet/TSRpcServerDemo) and [TSRpcClientDemo](https://github.com/tswstarplanet/TSRpcClientDemo).
 
 3. Start the Nacos server.
 
