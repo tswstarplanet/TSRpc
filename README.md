@@ -106,4 +106,20 @@ Open the cmd terminal, then navigate to the `bin` directory of the Nacos server 
 startup.cmd -m standalone
 ```
 
+4. Start the server application.
+
+You can start the server application by running the main method of the `com.wts.tsrpcserverdemo.TSRpcServerDemoApplication` class.
+
+5. Start the client application.
+
+You can start the client application by running the main method of the `com.wts.tsrpcclientdemo.TSRpcClientDemoApplication` class.
+
+6. Test the remote service.
+
+You can test the remote service by sending an HTTP request to the client application, the client application will invoke the server application. For example, you can use the following URL:
+
+```shell
+localhost:8080/demo/test2?arg1=a&arg2=2
+```
+
 
