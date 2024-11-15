@@ -61,27 +61,37 @@ public class ClientInvoker {
     public Object invoke(Object[] arguments, ClientMethod method) {
 //        method.settleGenericParamTypes();
 //        String applicationId = clientService.getServiceApplicationId();
-        var applicationInstance = loadBalancer.balance(clientService.getServiceApplication());
-        HttpClient httpClient = HttpClient.getHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()));
-        if (httpClient == null) {
-            httpClient = HttpClient.addHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()), (new HttpClient(applicationInstance.getHost(), applicationInstance.getPort(), 10)).transformer(transformer).init());
-        }
-        ClientInvokerFilterChain invokerFilterChain = new ClientInvokerFilterChain();
-        invokerFilterChain.invokerFilters(clientDispatcher.getDefaultClientInvokerFilters())
-                .transformers(transformer)
-                .clientService(clientService)
-                .httpClient(httpClient);
-        ServiceRequest request = transformer.transformRequest(clientService, arguments);
-        request.setMethodName(method.getClientMethodName());
-        request.setArgTypeNames(Arrays.stream(method.getArgTypes()).map(Class::getName).toList().toArray(new String[0]));
+
+        ServiceResponse serviceResponse;
+        ServiceRequest request = null;
+        try {
+            request = transformer.transformRequest(clientService, arguments);
+            request.setMethodName(method.getClientMethodName());
+            request.setArgTypeNames(Arrays.stream(method.getArgTypes()).map(Class::getName).toList().toArray(new String[0]));
 //        request.setArgTypeNames((String[]) Arrays.stream(method.getArgTypes()).map(Class::getName).toArray());
-        request.setApplicationId(clientService.getServiceApplication().getApplicationId());
+            request.setApplicationId(clientService.getServiceApplication().getApplicationId());
+
+            var applicationInstance = loadBalancer.balance(clientService.getServiceApplication());
+
+            if (applicationInstance == null) {
+                throw new PanicException("No available application instance !");
+            }
+
+            HttpClient httpClient = HttpClient.getHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()));
+            if (httpClient == null) {
+                httpClient = HttpClient.addHttpClient(new Endpoint(applicationInstance.getHost(), applicationInstance.getPort()), (new HttpClient(applicationInstance.getHost(), applicationInstance.getPort(), 10)).transformer(transformer).init());
+            }
+            ClientInvokerFilterChain invokerFilterChain = new ClientInvokerFilterChain();
+            invokerFilterChain.invokerFilters(clientDispatcher.getDefaultClientInvokerFilters())
+                    .transformers(transformer)
+                    .clientService(clientService)
+                    .httpClient(httpClient);
+
 //        invokerFilterChain.doFilter(request, invokerFilterChain);
 
-        ClientCallTask clientCallTask = new ClientCallTask(invokerFilterChain, request, clientService.getTimeout());
-        Future<ServiceResponse> future = executorService.submit(clientCallTask);
-        ServiceResponse serviceResponse;
-        try {
+            ClientCallTask clientCallTask = new ClientCallTask(invokerFilterChain, request, clientService.getTimeout());
+            Future<ServiceResponse> future = executorService.submit(clientCallTask);
+
             serviceResponse = future.get(clientService.getTimeout(), TimeUnit.MILLISECONDS);
             if (serviceResponse == null) {
                 throw new PanicException("Service response is null !");
@@ -95,7 +105,9 @@ public class ClientInvoker {
             ClientInvokerResponseCache.getInstance().putException(request.getRequestId(), e);
             throw new PanicException(e.getMessage(), e);
         } finally {
-            ClientInvokerResponseCache.getInstance().removeFuture(request.getRequestId());
+            if (request != null) {
+                ClientInvokerResponseCache.getInstance().removeFuture(request.getRequestId());
+            }
         }
 
 //        ServiceRequest request = manager.getTransform(clientService.getTransformType()).transformRequest(clientService, arguments);

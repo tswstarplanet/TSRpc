@@ -12,6 +12,7 @@ import com.wts.tsrpc.server.manage.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -23,16 +24,16 @@ public class NacosRegistry extends AbstractRegistry implements Registry {
 
     private Properties properties = new Properties();
 
-    public NacosRegistry(String serverList, String namespace) {
-        super(serverList, namespace);
+    public NacosRegistry(String serverList, String namespace, Application application, Endpoint endpoint) {
+        super(serverList, namespace, application, endpoint);
         properties.setProperty(PropertyKeyConst.NAMESPACE, namespace);
         properties.setProperty(PropertyKeyConst.SERVER_ADDR, serverList);
     }
 
     @Override
-    public void register(Application application, Endpoint endpoint) {
+    public void register() {
         try {
-            namingService.registerInstance(application.getKey(), endpoint.getHost(), endpoint.getPort());
+            namingService.registerInstance(getApplication().getKey(), getEndpoint().getHost(), getEndpoint().getPort());
             log.info("Register application instance success");
         } catch (NacosException e) {
             throw new BizException(STR."Register application instance error: \{e.getErrCode()}, \{e.getErrMsg()}");
@@ -40,9 +41,10 @@ public class NacosRegistry extends AbstractRegistry implements Registry {
     }
 
     @Override
-    public void deregister(Application application, Endpoint endpoint) {
+    public void deregister() {
         try {
-            namingService.deregisterInstance(application.getKey(), endpoint.getHost(), endpoint.getPort());
+            namingService.deregisterInstance(getApplication().getKey(), getEndpoint().getHost(), getEndpoint().getPort());
+            log.info("Deregister application instance");
         } catch (NacosException e) {
             throw new BizException(STR."Deregister application instance error: \{e.getErrCode()}, \{e.getErrMsg()}");
         }
@@ -59,10 +61,10 @@ public class NacosRegistry extends AbstractRegistry implements Registry {
                                 if (CollectionUtils.isEmpty(((NamingEvent) event).getInstances())) {
                                     super.getInstanceMap().get(((NamingEvent) event).getServiceName()).clear();
                                 } else {
-                                    List<ApplicationInstance> applicationInstances = ((NamingEvent) event).getInstances().stream().map(instance -> {
+                                    List<ApplicationInstance> applicationInstances = new ArrayList<>(((NamingEvent) event).getInstances().stream().map(instance -> {
                                         String[] keyArray = instance.getServiceName().split(":");
                                         return new ApplicationInstance(keyArray[0], keyArray[1], instance.getIp(), instance.getPort());
-                                    }).toList();
+                                    }).toList());
                                     super.getInstanceMap().put(((NamingEvent) event).getServiceName(), applicationInstances);
                                 }
                             }
@@ -81,6 +83,7 @@ public class NacosRegistry extends AbstractRegistry implements Registry {
     public void init() {
         try {
             this.namingService = NamingFactory.createNamingService(properties);
+            Runtime.getRuntime().addShutdownHook(new Thread(this::deregister));
             log.info("Create nacos naming service success");
             log.info("Nacos registry init success");
         } catch (NacosException e) {

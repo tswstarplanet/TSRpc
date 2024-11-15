@@ -1,8 +1,6 @@
 package com.wts.spring.boot.configuration;
 
-import com.wts.tsrpc.client.Endpoint;
 import com.wts.tsrpc.common.registry.Registry;
-import com.wts.tsrpc.server.manage.Application;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
@@ -25,7 +23,7 @@ public class TSRpcRegistryInitializer implements SmartInitializingSingleton, App
     private void initRegistry() {
         Registry registry = applicationContext.getBean("registry", Registry.class);
         registry.init();
-        registry.register(applicationContext.getBean("application", Application.class), applicationContext.getBean("serverEndpoint", Endpoint.class));
+        registry.register();
     }
 
 }

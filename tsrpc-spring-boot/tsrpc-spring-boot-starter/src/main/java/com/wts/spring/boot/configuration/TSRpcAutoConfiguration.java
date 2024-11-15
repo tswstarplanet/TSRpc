@@ -161,11 +161,11 @@ public class TSRpcAutoConfiguration {
     }
 
     @Bean("registry")
-    public Registry registry(RegistryProperties registryProperties) {
+    public Registry registry(RegistryProperties registryProperties, Application application, Endpoint endpoint) {
         Registry registry = null;
         if (registryProperties.isEnable()) {
             if ("nacos".equals(registryProperties.getName())) {
-                registry = new NacosRegistry(registryProperties.getServerList(), registryProperties.getNamespace());
+                registry = new NacosRegistry(registryProperties.getServerList(), registryProperties.getNamespace(), application, endpoint);
             } // todo other registry will be implemented in the future
         }
         return registry;
