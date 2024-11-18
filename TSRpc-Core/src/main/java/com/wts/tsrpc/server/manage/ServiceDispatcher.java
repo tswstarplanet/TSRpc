@@ -3,6 +3,7 @@ package com.wts.tsrpc.server.manage;
 import com.wts.tsrpc.common.ServiceRequest;
 import com.wts.tsrpc.common.ServiceResponse;
 import com.wts.tsrpc.common.utils.ReflectUtils;
+import com.wts.tsrpc.exception.PanicException;
 import com.wts.tsrpc.server.proxy.JavassistServiceInvoker;
 import com.wts.tsrpc.server.service.Service;
 import com.wts.tsrpc.exception.BizException;
@@ -89,14 +90,14 @@ public class ServiceDispatcher {
 
     public ServiceDispatcher addService(String serviceId, Service service) {
         if (StringUtils.isEmpty(serviceId)) {
-            throw new BizException("ServiceId can not be empty !");
+            throw new PanicException("ServiceId can not be empty !");
         }
         if (service == null) {
-            throw new BizException("Service can not be null !");
+            throw new PanicException("Service can not be null !");
         }
         synchronized (serviceLock) {
             if (serviceMap.containsKey(serviceId)) {
-                throw new BizException("The service has been exist in the service map !");
+                throw new PanicException("The service has been exist in the service map !");
             }
             try {
                 Class<?> clazz = Class.forName(service.getClassFullName());
